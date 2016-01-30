@@ -19,8 +19,9 @@ def train_rnn(params):
    print "Training size: "+str(len(X_train))
    nb_epochs=params['n_epochs']
 
-   print("Model loaded")
-   model=  model_provider.get_model(params)
+
+   model= model_provider.get_model(params)
+   print("Model loaded. #params: %s"%(model.n_param))
    train_errors = np.ndarray(nb_epochs)
    for i in range(nb_epochs):
       batch_loss = 0.

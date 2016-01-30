@@ -29,6 +29,7 @@ class lstm:
        self.b_o = shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_lstm)))
        self.W_hy = init_weight((self.n_lstm, self.n_out),'W_hy')
        self.b_y = shared(np.zeros(n_out, dtype=dtype))
+
        self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,
                       self.W_xf, self.W_hf, self.W_cf, self.b_f,
                       self.W_xc, self.W_hc, self.b_c,
@@ -87,3 +88,4 @@ class lstm:
        #self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
        self.predictions = theano.function(inputs = [X], outputs = y_vals.dimshuffle(1,0,2),allow_input_downcast=True)
        self.debug = theano.function(inputs = [X, Y], outputs = [X.shape, Y.shape, y_vals.shape, cxe.shape])
+       self.n_param=n_lstm*n_lstm*4+n_in*n_lstm*4+n_lstm*n_out+n_lstm*3
