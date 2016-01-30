@@ -1,0 +1,13 @@
+*.pkl
+*.pyc
+*.gtignore
+*.npy
+*.h5
+*.hdf5
+*.pkl
+*.pkl
+*.txt
+*.png
+*.caffemodel
+*.prototxt
+.idea/
