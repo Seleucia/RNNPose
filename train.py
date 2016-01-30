@@ -39,10 +39,10 @@ def train_rnn(params):
              x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
              y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
              pred = model.predictions(x)
-             loss=np.mean((pred - y) ** 2)
+             loss=np.mean(np.abs(pred - y))
              batch_loss += loss
           batch_loss/=n_test_batches
-          print("Test Epoch loss: %s"%(batch_loss))
+          print("Test mean abs loss: %s"%(batch_loss))
 
 
 
