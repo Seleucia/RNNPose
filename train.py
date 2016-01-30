@@ -31,6 +31,7 @@ def train_rnn(params):
           batch_loss += loss
       train_errors[i] = batch_loss
       batch_loss/=n_train_batches
+      print("Train Epoch loss(%s): %s"%(i,batch_loss))
       if(i%5==0):
           print("Model testing")
           batch_loss = 0.
@@ -42,7 +43,7 @@ def train_rnn(params):
              batch_loss += loss
           batch_loss/=n_test_batches
           print("Test Epoch loss: %s"%(batch_loss))
-          print("Train Epoch loss(%s): %s"%(i,batch_loss))
+
 
 
 params= config.get_params()
