@@ -15,8 +15,9 @@ def get_params():
    params['conv_use']= 0
    params['validate']= 1
 
-   params['batch_size']=240
+   params['batch_size']=64
    params['shufle_data']=1
+   params['max_count']= 300
 
    #system settings
    wd=os.path.dirname(os.path.realpath(__file__))
@@ -47,11 +48,13 @@ def get_params():
        params['n_patch']= 1
        params['n_repeat']= 1
        params['n_hidden']= 2
+       params['max_count']= 300
 
    if(platform.node()=="milletari-workstation"):
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 512
+       params['max_count']= 3000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60
@@ -59,6 +62,7 @@ def get_params():
        params["WITH_GPU"]=True
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
        params['n_hidden']= 256
+       params['max_count']= 3000000
 
    #params['step_size']=[10]
    params['test_size']=0.20 #Test size

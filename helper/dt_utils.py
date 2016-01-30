@@ -3,12 +3,12 @@ import struct
 import os
 import numpy
 
-def laod_pose():
-   base_file="/home/coskun/PycharmProjects/data/rnn/"
-   max_count=100
-   p_count=20
-   X_test,Y_test=laod_test_pose(base_file,max_count,p_count)
-   X_train,Y_train=laod_train_pose(base_file,max_count,p_count)
+def laod_pose(params):
+   data_dir=params["data_dir"]
+   max_count=params["max_count"]
+   seq_length=params["seq_length"]
+   X_test,Y_test=laod_test_pose(data_dir,max_count,seq_length)
+   X_train,Y_train=laod_train_pose(data_dir,max_count,seq_length)
    return (X_train,Y_train,X_test,Y_test)
 
 def laod_test_pose(base_file,max_count,p_count):

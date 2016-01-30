@@ -7,7 +7,7 @@ import helper.dt_utils as du
 
 
 def train_rnn(params):
-   (X_train,Y_train,X_test,Y_test)=du.laod_pose()
+   (X_train,Y_train,X_test,Y_test)=du.laod_pose(params)
    batch_size=params['batch_size']
    n_train_batches = len(X_train)
    n_train_batches /= batch_size
