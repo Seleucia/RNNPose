@@ -2,7 +2,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight
+from helper.utils import init_weight,init_bias
 from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
@@ -15,20 +15,20 @@ class lstm:
        self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi')
        self.W_hi = init_weight((self.n_lstm, self.n_lstm),'W_hi', 'svd')
        self.W_ci = init_weight((self.n_lstm, self.n_lstm),'W_ci', 'svd')
-       self.b_i = shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_lstm)))
+       self.b_i = init_bias(self.n_lstm, sample='zero')
        self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf')
        self.W_hf = init_weight((self.n_lstm, self.n_lstm),'W_hf', 'svd')
        self.W_cf = init_weight((self.n_lstm, self.n_lstm),'W_cf', 'svd')
-       self.b_f = shared(np.cast[dtype](np.random.uniform(0, 1.,size = n_lstm)))
+       self.b_f = init_bias(self.n_lstm, sample='zero')
        self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc')
        self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'svd')
-       self.b_c = shared(np.zeros(n_lstm, dtype=dtype))
+       self.b_c = init_bias(self.n_lstm, sample='zero')
        self.W_xo = init_weight((self.n_in, self.n_lstm),'W_xo')
        self.W_ho = init_weight((self.n_lstm, self.n_lstm),'W_ho', 'svd')
        self.W_co = init_weight((self.n_lstm, self.n_lstm),'W_co', 'svd')
-       self.b_o = shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_lstm)))
+       self.b_o = init_bias(self.n_lstm, sample='zero')
        self.W_hy = init_weight((self.n_lstm, self.n_out),'W_hy')
-       self.b_y = shared(np.zeros(n_out, dtype=dtype))
+       self.b_y = init_bias(self.n_lstm, sample='zero')
 
        self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,
                       self.W_xf, self.W_hf, self.W_cf, self.b_f,

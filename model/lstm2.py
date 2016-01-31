@@ -2,7 +2,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight
+from helper.utils import init_weight,init_bias
 from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
@@ -16,39 +16,39 @@ class lstm2:
        self.W_xi_1 = init_weight((self.n_in, self.n_lstm), 'W_xi_1')
        self.W_hi_1 = init_weight((self.n_lstm, self.n_lstm), 'W_hi_1', 'svd')
        self.W_ci_1 = init_weight((self.n_lstm, self.n_lstm), 'W_ci_1', 'svd')
-       self.b_i_1 = shared(np.cast[dtype](np.random.uniform(-0.5, .5, size = n_lstm)))
+       self.b_i_1 = init_bias(self.n_lstm, sample='zero')
        self.W_xf_1 = init_weight((self.n_in, self.n_lstm), 'W_xf_1')
        self.W_hf_1 = init_weight((self.n_lstm, self.n_lstm), 'W_hf_1', 'svd')
        self.W_cf_1 = init_weight((self.n_lstm, self.n_lstm), 'W_cf_1', 'svd')
-       self.b_f_1 = shared(np.cast[dtype](np.random.uniform(0, 1., size = n_lstm)))
+       self.b_f_1 = init_bias(self.n_lstm, sample='zero')
        self.W_xc_1 = init_weight((self.n_in, self.n_lstm), 'W_xc_1')
        self.W_hc_1 = init_weight((self.n_lstm, self.n_lstm), 'W_hc_1', 'svd')
-       self.b_c_1 = shared(np.zeros(n_lstm, dtype=dtype))
+       self.b_c_1 = init_bias(self.n_lstm, sample='zero')
        self.W_xo_1 = init_weight((self.n_in, self.n_lstm), 'W_xo_1')
        self.W_ho_1 = init_weight((self.n_lstm, self.n_lstm), 'W_ho_1', 'svd')
        self.W_co_1 = init_weight((self.n_lstm, self.n_lstm), 'W_co_1', 'svd')
-       self.b_o_1 = shared(np.cast[dtype](np.random.uniform(-0.5, .5, size = n_lstm)))
+       self.b_o_1 = init_bias(self.n_lstm, sample='zero')
        self.W_hy_1 = init_weight((self.n_lstm, self.n_out), 'W_hy_1')
-       self.b_y_1 = shared(np.zeros(n_out, dtype=dtype))
+       self.b_y_1 = init_bias(self.n_lstm, sample='zero')
 
        #2th layer
        self.W_xi_2 = init_weight((self.n_lstm, self.n_lstm), 'W_xi_2')
        self.W_hi_2 = init_weight((self.n_lstm, self.n_lstm), 'W_hi_2', 'svd')
        self.W_ci_2 = init_weight((self.n_lstm, self.n_lstm), 'W_ci_2', 'svd')
-       self.b_i_2 = shared(np.cast[dtype](np.random.uniform(-0.5, .5, size = n_lstm)))
+       self.b_i_2 = init_bias(self.n_lstm, sample='zero')
        self.W_xf_2 = init_weight((self.n_lstm, self.n_lstm), 'W_xf_2')
        self.W_hf_2 = init_weight((self.n_lstm, self.n_lstm), 'W_hf_2', 'svd')
        self.W_cf_2 = init_weight((self.n_lstm, self.n_lstm), 'W_cf_2', 'svd')
-       self.b_f_2 = shared(np.cast[dtype](np.random.uniform(0, 1., size = n_lstm)))
+       self.b_f_2 = init_bias(self.n_lstm, sample='zero')
        self.W_xc_2 = init_weight((self.n_lstm, self.n_lstm), 'W_xc_2')
        self.W_hc_2 = init_weight((self.n_lstm, self.n_lstm), 'W_hc_2', 'svd')
-       self.b_c_2 = shared(np.zeros(n_lstm, dtype=dtype))
+       self.b_c_2 = init_bias(self.n_lstm, sample='zero')
        self.W_xo_2 = init_weight((self.n_lstm, self.n_lstm), 'W_xo_2')
        self.W_ho_2 = init_weight((self.n_lstm, self.n_lstm), 'W_ho_2', 'svd')
        self.W_co_2 = init_weight((self.n_lstm, self.n_lstm), 'W_co_2', 'svd')
-       self.b_o_2 = shared(np.cast[dtype](np.random.uniform(-0.5, .5, size = n_lstm)))
+       self.b_o_2 = init_bias(self.n_lstm, sample='zero')
        self.W_hy_2 = init_weight((self.n_lstm, self.n_out), 'W_hy_2')
-       self.b_y_2 = shared(np.zeros(n_out, dtype=dtype))
+       self.b_y_2 = init_bias(self.n_lstm, sample='zero')
 
 
        self.params = [
