@@ -37,7 +37,7 @@ def get_params():
    params['initial_learning_rate']=0.001
    params['learning_rate_decay']= 0.998
    params['squared_filter_length_limit']=15.0
-   params['n_epochs']=256
+   params['n_epochs']=25600
    params['n_hidden']= 512
 
    if(platform.node()=="hc"):
@@ -53,7 +53,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 512
-       params['max_count']= 3000000
+       params['max_count']= 30000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60
