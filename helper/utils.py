@@ -13,7 +13,18 @@ dtype = T.config.floatX
 def numpy_floatX(data):
     return numpy.asarray(data, dtype=T.config.floatX)
 
-def init_weight(shape, name, sample='uni', seed=None):
+def init_bias(n_out, sample='zero'):
+    if sample == 'zero':
+        b = shared(np.zeros((n_out,), dtype=dtype))
+    elif sample == 'uni':
+        b=shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_out)))
+    else:
+        raise ValueError("Unsupported initialization scheme: %s"
+                         % sample)
+
+    return b
+
+def init_weight(shape, name, sample='glorot', seed=None):
     rng = np.random.RandomState(seed)
 
     if sample == 'unishape':
@@ -30,6 +41,18 @@ def init_weight(shape, name, sample='uni', seed=None):
 
     elif sample == 'uni':
         values = rng.uniform(low=-0.1, high=0.1, size=shape).astype(dtype)
+
+    elif sample == 'glorot':
+        ''' Reference: Glorot & Bengio, AISTATS 2010
+        '''
+        fan_in, fan_out = shape[0],shape[1]
+        s = np.sqrt(2. / (fan_in + fan_out))
+        values=np.random.normal(loc=0.0, scale=s, size=shape)
+
+    elif sample == 'ortho':
+        W = rng.uniform(low=-1., high=1., size=shape).astype(dtype)
+        u, s, v = numpy.linalg.svd(W)
+        values= u.astype(dtype)
 
     elif sample == 'zero':
         values = np.zeros(shape=shape, dtype=dtype)
