@@ -47,7 +47,7 @@ def init_weight(shape, name, sample='glorot', seed=None):
         '''
         fan_in, fan_out = shape[0],shape[1]
         s = np.sqrt(2. / (fan_in + fan_out))
-        values=np.random.normal(loc=0.0, scale=s, size=shape)
+        values=np.random.normal(loc=0.0, scale=s, size=shape).astype(dtype)
 
     elif sample == 'ortho':
         W = rng.uniform(low=-1., high=1., size=shape).astype(dtype)
