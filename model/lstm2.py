@@ -8,7 +8,7 @@ from helper.optimizer import RMSprop
 dtype = T.config.floatX
 
 class lstm2:
-   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='nll'):
+   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll'):
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
@@ -90,11 +90,7 @@ class lstm2:
        [h_vals_1, c_vals_1,h_vals_2, c_vals_2, y_vals], _ = theano.scan(fn=step_lstm,
                                          sequences=X.dimshuffle(1,0,2),
                                          outputs_info=[h0_1, c0_1,h0_2, c0_2, None])
-
-       if single_output:
-           self.output = y_vals[-1]
-       else:
-           self.output = y_vals.dimshuffle(1,0,2)
+       self.output = y_vals.dimshuffle(1,0,2)
 
        cxe = T.mean(T.nnet.binary_crossentropy(self.output, Y))
        nll = -T.mean(Y * T.log(self.output)+ (1.- Y) * T.log(1. - self.output))

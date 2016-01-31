@@ -9,7 +9,7 @@ def get_params():
    params['run_mode']=1 #0,full,1:only for check, 2: very small ds, 3:only ICL data
    params["rn_id"]="model_test" #running id, model
    params["notes"]="Im testing my data loading approach" #running id
-   params["model"]="lstm2"#kccnr,dccnr
+   params["model"]="erd"#kccnr,dccnr
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
@@ -67,4 +67,8 @@ def get_params():
    params['test_size']=0.20 #Test size
    params['val_size']=0.20 #Test size
    params['test_freq']=100 #Test frequency
+   return params
+
+def update_params(params):
+   params['log_file']=params["wd"]+"/logs/"+params["model"]+"_"+params["rn_id"]+"_"+str(params['run_mode'])+"_"+utils.get_time()+".txt"
    return params

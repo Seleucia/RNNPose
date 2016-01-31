@@ -57,5 +57,5 @@ parser = argparse.ArgumentParser(description='Training the module')
 parser.add_argument('-m','--model',help='Model: lstm, lstm2, current('+params["model"]+')',default=params["model"])
 args = vars(parser.parse_args())
 params["model"]=args["model"]
-
+params=config.update_params(params)
 train_rnn(params)
