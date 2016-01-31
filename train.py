@@ -1,7 +1,6 @@
 import numpy as np
-import theano
+import argparse
 import helper.config as config
-from helper.utils import init_weight
 import model.model_provider as model_provider
 import helper.dt_utils as du
 import helper.utils as u
@@ -53,6 +52,10 @@ def train_rnn(params):
           u.log_write(s,params)
 
 
-
 params= config.get_params()
+parser = argparse.ArgumentParser(description='Training the module')
+parser.add_argument('-m','--model',help='Model: lstm, lstm2, current('+params["model"]+')',default=params["model"])
+args = vars(parser.parse_args())
+params["model"]=args["model"]
+
 train_rnn(params)
