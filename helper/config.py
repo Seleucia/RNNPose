@@ -12,7 +12,6 @@ def get_params():
    params["model"]="mlstm"#kccnr,dccnr
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
-   params['conv_use']= 0
    params['validate']= 1
 
    params['batch_size']=64

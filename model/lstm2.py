@@ -7,7 +7,7 @@ from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
 
-class mlstm:
+class lstm2:
    def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='nll'):
        self.n_in = n_in
        self.n_lstm = n_lstm

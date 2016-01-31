@@ -40,8 +40,6 @@ def init_weight(shape, name, sample='uni', seed=None):
 
     return shared(values, name=name, borrow=True)
 
-
-
 def init_W_b(W, b, rng, n_in, n_out):
     # for a discussion of the initialization, see
     # https://plus.google.com/+EricBattenberg/posts/f3tPKjo7LFa
@@ -61,7 +59,6 @@ def init_W_b(W, b, rng, n_in, n_out):
         b_values = numpy.ones((n_out,), dtype=theano.config.floatX) * numpy.cast[theano.config.floatX](0.01)
         b = theano.shared(value=b_values, name='b', borrow=True)
     return W, b
-
 
 def init_CNNW_b(W, b, rng, n_in, n_out,fshape):
     # for a discussion of the initialization, see
@@ -94,87 +91,25 @@ def rescale_weights(params, incoming_max):
         w[:, w_sum>incoming_max] = w[:, w_sum>incoming_max] * numpy.sqrt(incoming_max) / w_sum[w_sum>incoming_max]
         p.set_value(w)
 
-def up_sample(overlaps,data_y,step_size):
-    data_yy=[]
-    for index in range(len(overlaps)):
-        value= sum(numpy.asarray(data_y)[overlaps[index]]) / (step_size * len(overlaps[index]))
-        data_yy.append(value)
-    return numpy.asarray(data_yy)
-
-def convert_to_grayscale(params):
-    for dir in params["dataset"]:
-        if dir ==-1:
-            continue
-        im_type='rgb'
-        im_type_to='gray'
-        new_dir=dir[0]+im_type_to+"/"
-        if not os.path.exists(new_dir):
-            os.makedirs(new_dir)
-            full_path=dir[0]+'/'+im_type+'/*.png'
-            lst=glob.glob(full_path)
-            for f in lst:
-                img = Image.open(f).convert('L')
-                img.save(new_dir+os.path.basename(f))
-            print("data set converted %s"%(dir[0]))
-        else:
-            print("data set has already converted %s"%(dir[0]))
-    print "Gray scale conversation completed"
-
-
-def start_log(datasets,params):
+def start_log(params):
     log_file=params["log_file"]
     create_file(log_file)
 
-    X_train, y_train,overlaps_train = datasets[0]
-    X_val, y_val,overlaps_val = datasets[1]
-    X_test, y_test,overlaps_test = datasets[2]
-    y_train_mean=np.mean(y_train)
-    y_train_abs_mean=np.mean(np.abs(y_train))
-    y_val_mean=np.mean(y_val)
-    y_val_abs_mean=np.mean(np.abs(y_val))
-    y_test_mean=np.mean(y_test)
-    y_test_abs_mean=np.mean(np.abs(y_test))
     ds= get_time()
 
     log_write("Run Id: %s"%(params['rn_id']),params)
     log_write("Deployment notes: %s"%(params['notes']),params)
     log_write("Running mode: %s"%(params['run_mode']),params)
     log_write("Running model: %s"%(params['model']),params)
-    log_write("Image type: %s"%(params["im_type"]),params)
     log_write("Batch size: %s"%(params['batch_size']),params)
-    log_write("Images are cropped to: %s"%(params['size']),params)
-    log_write("Dataset splits: %s"%(params["step_size"]),params)
-    log_write("List of dataset used:",params)
-
-    for dir in params["dataset"]:
-        if dir==-1:
-            continue
-        log_write(dir[0],params)
+    log_write("Sequence size: %s"%(params['seq_length']),params)
 
     log_write("Starting Time:%s"%(ds),params)
-    log_write("size of training data:%f"%(len(X_train)),params)
-    log_write("size of val data:%f"%(len(X_val)),params)
-    log_write("size of test data:%f"%(len(X_test)),params)
-    log_write("Mean of training data:%f, abs mean: %f"%(y_train_mean,y_train_abs_mean),params)
-    log_write("Mean of val data:%f, abs mean: %f"%(y_val_mean,y_val_abs_mean),params)
-    log_write("Mean of test data:%f, abs mean: %f"%(y_test_mean,y_test_abs_mean),params)
+    log_write("size of training data:%f"%(params["len_train"]),params)
+    log_write("size of test data:%f"%(params["len_test"]),params)
 
 def get_time():
     return str(datetime.datetime.now().time()).replace(":","-").replace(".","-")
-
-def get_map_loc():
-    ind=randint(0,512)
-    return ind
-def get_patch_loc(params):
-    patch_margin=params["patch_margin"]
-    orijinal_size=params['orijinal_size']
-    size=params['size']
-    x1=randint(patch_margin[0],orijinal_size[0]-(patch_margin[0]+size[0]))
-    x2=x1+size[0]
-
-    y1=randint(patch_margin[1],orijinal_size[1]-(patch_margin[1]+size[1]))
-    y2=y1+size[1]
-    return (x1,y1,x2,y2)
 
 def create_file(log_file):
     log_dir= os.path.dirname(log_file)
@@ -196,7 +131,6 @@ def log_write(str,params):
     ds= get_time()
     str=ds+" | "+str+"\n"
     log_to_file(str,params)
-
 
 def log_read(mode,params):
     wd=params["wd"]
@@ -247,7 +181,6 @@ def log_read_train(params):
     #numpy.array([[b, c, d] for (b, c, d) in list_val if b==1 ])[:,2] #first epoch all error
     return list
 
-
 def huber(y_true, y_pred, epsilon=0.1):
     """Huber regression loss
     Variant of the SquaredLoss that is robust to outliers (quadratic near zero,
@@ -282,7 +215,6 @@ def epsilon_insensitive(y_true,y_pred, epsilon):
     """
     loss = T.maximum(T.abs_(y_true-y_pred)-epsilon,0)
     return loss
-
 
 def mean_squared_epislon_insensitive(y_true, y_pred):
     """Epsilon-Insensitive loss.

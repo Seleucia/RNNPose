@@ -1,12 +1,12 @@
 from model.lstm import  lstm
-from model.mlstm import  mlstm
+from model.lstm2 import lstm2
 import theano
 
 def get_model(params):
     if(params["model"]=="lstm"):
-        model = lstm(1024, params['n_hidden'], 54,batch_size=params['batch_size'], single_output=False,output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
+        model = lstm(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'], single_output=False,output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
     if(params["model"]=="mlstm"):
-        model = mlstm(1024, params['n_hidden'], 54,batch_size=params['batch_size'], single_output=False,output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
+        model = lstm2(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'], single_output=False,output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
     return model
 
 def get_model_pretrained(params):
