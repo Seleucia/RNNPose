@@ -54,7 +54,7 @@ def train_rnn(params):
 
 params= config.get_params()
 parser = argparse.ArgumentParser(description='Training the module')
-parser.add_argument('-m','--model',help='Model: lstm, lstm2, current('+params["model"]+')',default=params["model"])
+parser.add_argument('-m','--model',help='Model: lstm, lstm2, erd current('+params["model"]+')',default=params["model"])
 args = vars(parser.parse_args())
 params["model"]=args["model"]
 params=config.update_params(params)
