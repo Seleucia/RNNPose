@@ -9,7 +9,7 @@ def get_params():
    params['run_mode']=1 #0,full,1:only for check, 2: very small ds, 3:only ICL data
    params["rn_id"]="model_test" #running id, model
    params["notes"]="Im testing my data loading approach" #running id
-   params["model"]="mlstm"#kccnr,dccnr
+   params["model"]="lstm2"#kccnr,dccnr
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1

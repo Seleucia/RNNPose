@@ -5,7 +5,7 @@ import theano
 def get_model(params):
     if(params["model"]=="lstm"):
         model = lstm(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'], single_output=False,output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
-    if(params["model"]=="mlstm"):
+    if(params["model"]=="lstm2"):
         model = lstm2(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'], single_output=False,output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
     return model
 
