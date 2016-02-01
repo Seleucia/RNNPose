@@ -48,7 +48,7 @@ class lstm2:
        self.W_co_2 = init_weight((self.n_lstm, self.n_lstm), 'W_co_2', 'svd')
        self.b_o_2 = init_bias(self.n_lstm, sample='zero')
        self.W_hy_2 = init_weight((self.n_lstm, self.n_out), 'W_hy_2')
-       self.b_y_2 = init_bias(self.n_lstm, sample='zero')
+       self.b_y_2 = init_bias(self.n_out, sample='zero')
 
 
        self.params = [
