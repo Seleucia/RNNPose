@@ -8,35 +8,40 @@ from helper.optimizer import RMSprop
 dtype = T.config.floatX
 
 
-class erd:
+class erd_pre:
    def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='nll'):
 
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
-       self.nzeros_fc1=500
        self.n_fc1=500
        self.n_fc2=500
+       self.n_prefc1=256
+       self.n_prefc2=256
 
+
+       self.W_prefc1 = init_weight((self.n_in, self.n_prefc1),'W_prefc1')
+       self.b_prefc1 = init_bias(self.n_prefc1, sample='zero')
+       self.W_prefc2 = init_weight((self.n_prefc1, self.n_prefc2),'W_prefc2')
+       self.b_prefc2 =init_bias(self.n_prefc2, sample='zero')
 
        self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1')
        self.b_fc1 = init_bias(self.n_fc2, sample='zero')
-
        self.W_fc2 = init_weight((self.n_fc2, self.n_out),'W_fc2')
        self.b_fc2 =init_bias(self.n_out, sample='zero')
 
-       self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi')
+       self.W_xi = init_weight((self.n_prefc2, self.n_lstm),'W_xi')
        self.W_hi = init_weight((self.n_lstm, self.n_lstm),'W_hi', 'svd')
        self.W_ci = init_weight((self.n_lstm, self.n_lstm),'W_ci', 'svd')
        self.b_i = init_bias(self.n_lstm, sample='zero')
-       self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf')
+       self.W_xf = init_weight((self.n_prefc2, self.n_lstm),'W_xf')
        self.W_hf = init_weight((self.n_lstm, self.n_lstm),'W_hf', 'svd')
        self.W_cf = init_weight((self.n_lstm, self.n_lstm),'W_cf', 'svd')
        self.b_f =init_bias(self.n_lstm, sample='zero')
-       self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc')
+       self.W_xc = init_weight((self.n_prefc2, self.n_lstm),'W_xc')
        self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'svd')
        self.b_c = shared(np.zeros(n_lstm, dtype=dtype))
-       self.W_xo = init_weight((self.n_in, self.n_lstm),'W_xo')
+       self.W_xo = init_weight((self.n_prefc2, self.n_lstm),'W_xo')
        self.W_ho = init_weight((self.n_lstm, self.n_lstm),'W_ho', 'svd')
        self.W_co = init_weight((self.n_lstm, self.n_lstm),'W_co', 'svd')
        self.b_o = init_bias(self.n_lstm, sample='zero')
@@ -47,7 +52,8 @@ class erd:
                       self.W_xf, self.W_hf, self.W_cf, self.b_f,
                       self.W_xc, self.W_hc, self.b_c,
                       self.W_ho, self.W_co, self.b_o,
-                      self.W_hy, self.b_y,self.W_fc1, self.b_fc1,self.W_fc2, self.b_fc2]
+                      self.W_hy, self.b_y,self.W_fc1, self.b_fc1,self.W_fc2, self.b_fc2,
+                      self.W_prefc1, self.b_prefc1,self.W_prefc2, self.b_prefc2]
 
 
        def step_lstm(x_t, h_tm1, c_tm1):
@@ -64,8 +70,12 @@ class erd:
        h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
        c0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
 
+       #Hidden layer
+       prefc1_out = T.tanh(T.dot(X.dimshuffle(1,0,2), self.W_prefc1)  + self.b_prefc1)
+       prefc2_out = T.tanh(T.dot(prefc1_out, self.W_prefc2)  + self.b_prefc2)
+
        [h_vals, c_vals, y_vals], _ = theano.scan(fn=step_lstm,
-                                         sequences=X.dimshuffle(1,0,2),
+                                         sequences=prefc2_out,
                                          outputs_info=[h0, c0, None])
 
 
