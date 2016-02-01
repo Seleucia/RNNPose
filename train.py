@@ -40,15 +40,20 @@ def train_rnn(params):
       if(epoch_counter%5==0):
           print("Model testing")
           batch_loss = 0.
+          batch_loss3d = 0.
           for minibatch_index in range(n_test_batches):
              x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
              y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
              pred = model.predictions(x)
              loss=np.mean(np.abs(pred - y))
+             loss3d =u.get_loss(y,pred)
+
              batch_loss += loss
+             batch_loss3d += loss3d
           batch_loss/=n_test_batches
+          batch_loss3d/=n_test_batches
           val_counter+=1
-          s ='VAL--> epoch %i | error %f '%(val_counter,batch_loss)
+          s ='VAL--> epoch %i | error %f, %f '%(val_counter,batch_loss,batch_loss3d)
           u.log_write(s,params)
 
 

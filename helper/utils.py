@@ -103,8 +103,22 @@ def init_CNNW_b(W, b, rng, n_in, n_out,fshape):
         b = theano.shared(value=b_values, name='b', borrow=True)
     return W, b
 
+
+def get_loss(gt,est):
+    batch_size=gt.shape[0]
+    seq_length=gt.shape[1]
+    loss=0
+    for b in range(batch_size):
+        for s in range(seq_length):
+            loss +=np.mean(np.sum((gt[b][s].reshape(18,3) - est[b][s].reshape(18,3))**2,axis=1))
+    loss/=(seq_length*batch_size)
+
+    return loss
+
+
 rng = numpy.random.RandomState(1234)
 srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
+
 
 def rescale_weights(params, incoming_max):
     incoming_max = numpy.cast[theano.config.floatX](incoming_max)
