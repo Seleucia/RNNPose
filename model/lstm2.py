@@ -76,7 +76,7 @@ class lstm2:
            c_t_2 = f_t_2 * c_tm2 + i_t_2 * T.tanh(T.dot(h_t_1, self.W_xc_2) + T.dot(h_tm2, self.W_hc_2) + self.b_c_2)
            o_t_2 = T.nnet.sigmoid(T.dot(h_t_1, self.W_xo_2) + T.dot(h_tm2, self.W_ho_2) + T.dot(c_t_2, self.W_co_2) + self.b_o_2)
            h_t_2 = o_t_2 * T.tanh(c_t_2)
-           y_t_2 = output_activation(T.dot(h_t_2, self.W_hy_2) + self.b_y_2)
+           y_t_2 = T.nnet.sigmoid(T.dot(h_t_2, self.W_hy_2) + self.b_y_2)
 
            return [h_t_1,c_t_1,h_t_2,c_t_2, y_t_2]
 

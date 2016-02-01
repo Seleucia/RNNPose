@@ -36,14 +36,13 @@ class lstm:
                       self.W_ho, self.W_co, self.b_o,
                       self.W_hy, self.b_y]
 
-
        def step_lstm(x_t, h_tm1, c_tm1):
            i_t = T.nnet.sigmoid(T.dot(x_t, self.W_xi) + T.dot(h_tm1, self.W_hi) + T.dot(c_tm1, self.W_ci) + self.b_i)
            f_t = T.nnet.sigmoid(T.dot(x_t, self.W_xf) + T.dot(h_tm1, self.W_hf) + T.dot(c_tm1, self.W_cf) + self.b_f)
            c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
            o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + T.dot(c_t, self.W_co)  + self.b_o)
            h_t = o_t * T.tanh(c_t)
-           y_t = output_activation(T.dot(h_t, self.W_hy) + self.b_y)
+           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy) + self.b_y)
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector
