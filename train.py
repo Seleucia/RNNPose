@@ -7,7 +7,7 @@ import helper.utils as u
 
 
 def train_rnn(params):
-   (X_train,Y_train,X_test,Y_test)=du.laod_pose(params)
+   (X_train,Y_train,X_test,Y_test)=du.load_pose(params)
    params["len_train"]=len(X_train)
    params["len_test"]=len(X_test)
    u.start_log(params)
@@ -33,6 +33,8 @@ def train_rnn(params):
           y=Y_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
           loss = model.train(x, y)
           batch_loss += loss
+      if params['shufle_data']==1:
+         X_test,Y_test=du.shuffle_in_unison_inplace(X_test,Y_test)
       train_errors[epoch_counter] = batch_loss
       batch_loss/=n_train_batches
       s='TRAIN--> epoch %i | error %f'%(epoch_counter, batch_loss)

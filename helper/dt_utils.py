@@ -3,15 +3,17 @@ import struct
 import os
 import numpy
 
-def laod_pose(params):
+def load_pose(params):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
-   X_test,Y_test=laod_test_pose(data_dir,max_count,seq_length)
-   X_train,Y_train=laod_train_pose(data_dir,max_count,seq_length)
+   X_test,Y_test=load_test_pose(data_dir,max_count,seq_length)
+   if params['shufle_data']==1:
+      X_test,Y_test=shuffle_in_unison_inplace(X_test,Y_test)
+   X_train,Y_train=load_train_pose(data_dir,max_count,seq_length)
    return (X_train,Y_train,X_test,Y_test)
 
-def laod_test_pose(base_file,max_count,p_count):
+def load_test_pose(base_file,max_count,p_count):
    base_file=base_file+"test/"
    X_D=[]
    Y_D=[]
@@ -53,7 +55,7 @@ def laod_test_pose(base_file,max_count,p_count):
 
    return (numpy.asarray(X_D),numpy.asarray(Y_D))
 
-def laod_train_pose(base_file,max_count,p_count):
+def load_train_pose(base_file,max_count,p_count):
    base_file=base_file+"train/"
    X_D=[]
    Y_D=[]
@@ -94,3 +96,8 @@ def laod_train_pose(base_file,max_count,p_count):
                        p_index=p_index+1
 
    return (numpy.asarray(X_D),numpy.asarray(Y_D))
+
+def shuffle_in_unison_inplace(a, b):
+   assert len(a) == len(b)
+   p = numpy.random.permutation(len(a))
+   return a[p], b[p]
