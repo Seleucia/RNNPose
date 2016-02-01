@@ -110,7 +110,7 @@ def get_loss(gt,est):
     loss=0
     for b in range(batch_size):
         for s in range(seq_length):
-            loss +=np.mean(np.sum((gt[b][s].reshape(18,3) - est[b][s].reshape(18,3))**2,axis=1))
+            loss +=np.mean(np.sum(np.sqrt((gt[b][s].reshape(18,3) - est[b][s].reshape(18,3))**2),axis=1))
     loss/=(seq_length*batch_size)
 
     return loss
