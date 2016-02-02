@@ -16,6 +16,8 @@ def numpy_floatX(data):
 def init_bias(n_out, sample='zero'):
     if sample == 'zero':
         b = np.zeros((n_out,), dtype=dtype)
+    if sample == 'one':
+        b = np.ones((n_out,), dtype=dtype)
     elif sample == 'uni':
         b=shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_out)))
     else:

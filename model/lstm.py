@@ -19,7 +19,7 @@ class lstm:
        self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf')
        self.W_hf = init_weight((self.n_lstm, self.n_lstm),'W_hf', 'svd')
        self.W_cf = init_weight((self.n_lstm, self.n_lstm),'W_cf', 'svd')
-       self.b_f = init_bias(self.n_lstm, sample='zero')
+       self.b_f = init_bias(self.n_lstm, sample='one')
        self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc')
        self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'svd')
        self.b_c = init_bias(self.n_lstm, sample='zero')
