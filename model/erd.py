@@ -15,8 +15,8 @@ class erd:
        self.n_lstm = n_lstm
        self.n_out = n_out
        self.nzeros_fc1=500
-       self.n_fc1=500
-       self.n_fc2=500
+       self.n_fc1=128
+       self.n_fc2=128
 
 
        self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1')
@@ -32,7 +32,7 @@ class erd:
        self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf')
        self.W_hf = init_weight((self.n_lstm, self.n_lstm),'W_hf', 'svd')
        self.W_cf = init_weight((self.n_lstm, self.n_lstm),'W_cf', 'svd')
-       self.b_f =init_bias(self.n_lstm, sample='zero')
+       self.b_f =init_bias(self.n_lstm, sample='one')
        self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc')
        self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'svd')
        self.b_c = shared(np.zeros(n_lstm, dtype=dtype))
