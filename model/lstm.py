@@ -78,6 +78,7 @@ class lstm:
        # self.loss = theano.function(inputs = [X, Y], outputs = [cxe, mse, cost])
        # self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
 
+
        self.train = theano.function(inputs=[X, Y],outputs=cost,updates=optimizer.getUpdates(),allow_input_downcast=True)
 
        #self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
