@@ -8,7 +8,7 @@ from helper.optimizer import RMSprop
 dtype = T.config.floatX
 
 class lstm2:
-   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll'):
+   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
@@ -103,7 +103,7 @@ class lstm2:
            cost = cxe
        else:
            cost = nll
-       optimizer = RMSprop(
+       _optimizer = optimizer(
             cost,
             self.params,
             lr=lr
@@ -115,7 +115,7 @@ class lstm2:
        # self.loss = theano.function(inputs = [X, Y], outputs = [cxe, mse, cost])
        # self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
 
-       self.train = theano.function(inputs=[X, Y],outputs=cost,updates=optimizer.getUpdates(),allow_input_downcast=True)
+       self.train = theano.function(inputs=[X, Y],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
 
        #self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
        self.predictions = theano.function(inputs = [X], outputs = y_vals.dimshuffle(1,0,2),allow_input_downcast=True)

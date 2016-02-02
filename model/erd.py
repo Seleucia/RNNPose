@@ -9,7 +9,7 @@ dtype = T.config.floatX
 
 
 class erd:
-   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='nll'):
+   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
 
        self.n_in = n_in
        self.n_lstm = n_lstm
@@ -86,7 +86,7 @@ class erd:
            cost = cxe
        else:
            cost = nll
-       optimizer = RMSprop(
+       _optimizer = optimizer(
             cost,
             self.params,
             lr=lr
@@ -98,7 +98,7 @@ class erd:
        # self.loss = theano.function(inputs = [X, Y], outputs = [cxe, mse, cost])
        # self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
 
-       self.train = theano.function(inputs=[X, Y],outputs=cost,updates=optimizer.getUpdates(),allow_input_downcast=True)
+       self.train = theano.function(inputs=[X, Y],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
 
        #self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
        self.predictions = theano.function(inputs = [X], outputs = self.output,allow_input_downcast=True)
