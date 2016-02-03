@@ -4,35 +4,64 @@ import theano.tensor as T
 from theano import shared
 from helper.utils import init_weight,init_bias
 from helper.optimizer import RMSprop
-
+import helper.utils as u
 dtype = T.config.floatX
 
 class gru:
-   def __init__(self, inputSize, hiddenSize, name = "GRU Layer", E = None, U = None, W = None, b = None, moduleType = "GRU"):
+   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
+      prefix = "GRU_"
+      self.n_in = n_in
+      self.n_lstm = n_lstm
+      self.n_out = n_out
 
-        self.inputSize = inputSize
-        self.hiddenSize = hiddenSize
-        self.name = name
-        self.moduleType = moduleType
+      self.W_xr = init_weight((self.n_in, self.n_out), "W_xr" )
+      self.W_hr = init_weight((self.n_out, self.n_out), "W_hr")
+      self.b_r = init_bias(self.n_out, "b_r")
 
-        if E == None:
-            E = np.random.uniform(-np.sqrt(1./inputSize), np.sqrt(1./inputSize), (hiddenSize, inputSize))
-            U = np.random.uniform(-np.sqrt(1./hiddenSize), np.sqrt(1./hiddenSize), (3 * 1, hiddenSize, hiddenSize))
-            W = np.random.uniform(-np.sqrt(1./hiddenSize), np.sqrt(1./hiddenSize), (3 * 1, hiddenSize, hiddenSize))
-            b = np.zeros((3 * 1, hiddenSize))
+      self.W_xz = init_weight((self.n_in, self.n_out), "W_xz")
+      self.W_hz = init_weight((self.n_out, self.n_out), "W_hz")
+      self.b_z = init_bias(self.n_out, "b_z")
 
-        self.E = theano.shared(name = name + '.E', value = E.astype(theano.config.floatX))
-        self.U = theano.shared(name = name + '.U', value = U.astype(theano.config.floatX))
-        self.W = theano.shared(name = name + '.W', value = W.astype(theano.config.floatX))
-        self.b = theano.shared(name = name + '.b', value = b.astype(theano.config.floatX))
+      self.W_xh = init_weight((self.n_in, self.n_out), "W_xh")
+      self.W_hh = init_weight((self.n_out, self.n_out), "W_hh")
+      self.b_h = init_bias(self.n_out, "b_h")
 
-    def step(self, x, s_prev):
+      self.params = [self.W_xr, self.W_hr, self.b_r,
+                    self.W_xz, self.W_hz, self.b_z,
+                    self.W_xh, self.W_hh, self.b_h]
 
-        x_emb = self.E[:, x]
+      X = T.tensor3() # batch of sequence of vector
+      Y = T.tensor3() # batch of sequence of vector (should be 0 when X is not null)
+      def step_gru(x,pre_h):
+         x = T.reshape(x, (batch_size, self.n_in))
+         pre_h = T.reshape(pre_h, (batch_size, self.n_out))
 
-        z = T.nnet.hard_sigmoid(self.W[0].dot(x_emb) + self.U[0].dot(s_prev) + self.b[0])
-        r = T.nnet.hard_sigmoid(self.W[1].dot(x_emb) + self.U[1].dot(s_prev) + self.b[1])
-        h = T.tanh(self.W[2].dot(x_emb) + self.U[2].dot(s_prev * r) + self.b[2])
-        s = (T.ones_like(z) - z) * h + z * s_prev
+         r = T.nnet.sigmoid(T.dot(x, self.W_xr) + T.dot(pre_h, self.W_hr) + self.b_r)
+         z = T.nnet.sigmoid(T.dot(x, self.W_xz) + T.dot(pre_h, self.W_hz) + self.b_z)
+         gh = T.tanh(T.dot(x, self.W_xh) + T.dot(r * pre_h, self.W_hh) + self.b_h)
+         h = z * pre_h + (1 - z) * gh
+         h = T.reshape(h, (1, batch_size * self.n_out))
+         return h
+      outputs, updates = theano.scan(step_gru, sequences = [X],
+                                     outputs_info = [T.alloc(dtype(0.), 1, batch_size * self.n_out)])
 
-        return s
+      self.output = T.reshape(outputs, (X.shape[0], batch_size * self.n_out))
+
+      cost = 0
+      if cost_function == 'mse':
+         cost = u.mse
+      elif cost_function == 'cxe':
+         cost = u.cxe
+      else:
+         cost = u.nll
+      _optimizer = optimizer(
+            cost,
+            self.params,
+            lr=lr
+        )
+
+      self.train = theano.function(inputs=[X, Y],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
+      self.predictions = theano.function(inputs = [X], outputs = y_vals.dimshuffle(1,0,2),allow_input_downcast=True)
+      self.n_param=(n_lstm*n_lstm*4+n_in*n_lstm*4+n_lstm*n_out+n_lstm*3)
+
+

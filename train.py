@@ -29,8 +29,8 @@ def train_rnn(params):
    for epoch_counter in range(nb_epochs):
       batch_loss = 0.
       for minibatch_index in range(n_train_batches):
-          x=X_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
-          y=Y_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
+          x=X_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
+          y=Y_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]#60*20*54
           loss = model.train(x, y)
           batch_loss += loss
       if params['shufle_data']==1:
@@ -39,6 +39,7 @@ def train_rnn(params):
       batch_loss/=n_train_batches
       s='TRAIN--> epoch %i | error %f'%(epoch_counter, batch_loss)
       u.log_write(s,params)
+      best_loss=0
       if(epoch_counter%5==0):
           print("Model testing")
           batch_loss = 0.
@@ -49,11 +50,14 @@ def train_rnn(params):
              pred = model.predictions(x)
              loss=np.mean(np.abs(pred - y))
              loss3d =u.get_loss(y,pred)
-
              batch_loss += loss
              batch_loss3d += loss3d
           batch_loss/=n_test_batches
           batch_loss3d/=n_test_batches
+          if(best_loss<batch_loss):
+             best_loss=batch_loss
+             ext=str(epoch_counter%5)+".p"
+             u.write_params(model.params,params,ext)
           val_counter+=1
           s ='VAL--> epoch %i | error %f, %f '%(val_counter,batch_loss,batch_loss3d)
           u.log_write(s,params)

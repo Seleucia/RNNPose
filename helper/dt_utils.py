@@ -3,11 +3,13 @@ import struct
 import os
 import numpy
 
-def load_pose(params):
+def load_pose(params,only_test=0):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
    X_test,Y_test=load_test_pose(data_dir,max_count,seq_length)
+   if only_test==1:
+      return (X_test,Y_test)
    if params['shufle_data']==1:
       X_test,Y_test=shuffle_in_unison_inplace(X_test,Y_test)
    X_train,Y_train=load_train_pose(data_dir,max_count,seq_length)

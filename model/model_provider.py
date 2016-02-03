@@ -3,6 +3,7 @@ from model.lstm2 import lstm2
 from model.erd import erd
 from model.erd_pre import erd_pre
 from helper.optimizer import ClipRMSprop
+import helper.utils as u
 import theano
 
 def get_model(params):
@@ -16,9 +17,8 @@ def get_model(params):
         model = erd_pre(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
     return model
 
-def get_model_pretrained(params):
+def get_model_pretrained(params,model_file):
+    params=u.read_params(params,model_file)
     model=get_model(params)
-    model.build()
-    model_name=params['model_file']+params['model_name']
-    model.load_weights(model_name)
+    model.params=u.read_params(params,model_file)
     return model

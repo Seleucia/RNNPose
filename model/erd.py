@@ -4,7 +4,7 @@ import theano.tensor as T
 from theano import shared
 from helper.utils import init_weight,init_bias
 from helper.optimizer import RMSprop
-
+import helper.utils as u
 dtype = T.config.floatX
 
 
@@ -15,7 +15,7 @@ class erd:
        self.n_lstm = n_lstm
        self.n_out = n_out
        self.nzeros_fc1=500
-       self.n_fc1=128
+       self.n_fc1=1024
        self.n_fc2=128
 
 
@@ -35,7 +35,7 @@ class erd:
        self.b_f =init_bias(self.n_lstm, sample='one')
        self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc')
        self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'svd')
-       self.b_c = shared(np.zeros(n_lstm, dtype=dtype))
+       self.b_c = init_bias(self.n_lstm, sample='zero')
        self.W_xo = init_weight((self.n_in, self.n_lstm),'W_xo')
        self.W_ho = init_weight((self.n_lstm, self.n_lstm),'W_ho', 'svd')
        self.W_co = init_weight((self.n_lstm, self.n_lstm),'W_co', 'svd')
@@ -68,9 +68,9 @@ class erd:
                                          sequences=X.dimshuffle(1,0,2),
                                          outputs_info=[h0, c0, None])
 
-
+       fc_in=y_vals*X.dimshuffle(1,0,2)
        #Hidden layer
-       fc1_out = T.tanh(T.dot(y_vals, self.W_fc1)  + self.b_fc1)
+       fc1_out = T.tanh(T.dot(fc_in, self.W_fc1)  + self.b_fc1)
        fc2_out = T.tanh(T.dot(fc1_out, self.W_fc2)  + self.b_fc2)
 
        self.output=fc2_out.dimshuffle(1,0,2)
@@ -91,16 +91,7 @@ class erd:
             self.params,
             lr=lr
         )
-       # gparams = T.grad(cost, self.params)
-       # updates = OrderedDict()
-       # for param, gparam in zip(self.params, gparams):
-       #     updates[param] = param - gparam * lr
-       # self.loss = theano.function(inputs = [X, Y], outputs = [cxe, mse, cost])
-       # self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
 
        self.train = theano.function(inputs=[X, Y],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
-
-       #self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
        self.predictions = theano.function(inputs = [X], outputs = self.output,allow_input_downcast=True)
-       self.debug = theano.function(inputs = [X, Y], outputs = [X.shape, Y.shape, y_vals.shape, cxe.shape])
        self.n_param=n_lstm*n_lstm*4+n_in*n_lstm*4+n_lstm*n_out+n_lstm*3

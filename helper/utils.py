@@ -8,6 +8,8 @@ import datetime
 import numpy as np
 from random import randint
 from theano import shared
+import pickle
+
 dtype = T.config.floatX
 
 def numpy_floatX(data):
@@ -112,7 +114,7 @@ def get_loss(gt,est):
     loss=0
     for b in range(batch_size):
         for s in range(seq_length):
-            loss +=np.mean(np.sum(np.sqrt((gt[b][s].reshape(18,3) - est[b][s].reshape(18,3))**2),axis=1))
+            loss +=np.mean(np.sqrt(np.sum((gt[b][s].reshape(18,3) - est[b][s].reshape(18,3))**2,axis=1)))
     loss/=(seq_length*batch_size)
 
     return loss
@@ -264,3 +266,26 @@ def mean_squared_epislon_insensitive(y_true, y_pred):
 
 msei=mean_squared_epislon_insensitive
 ah=alpha_huber
+
+def write_params(mparams,params,ext):
+    wd=params["wd"]
+    filename=params['model']+"_"+params["rn_id"]+"_"+ext
+    with open(wd+"/cp/"+filename,"a") as f:
+        pickle.dump([param.get_value() for param in mparams], f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def read_params(params,filename):
+    wd=params["wd"]
+    with open(wd+"/cp/"+filename) as f:
+        mparams=pickle.load(f)
+        return mparams
+
+def set_params(model,mparams):
+    counter=0
+    for p in mparams:
+        model.params[counter].set_value(p)
+    return p
+
+
+
+

@@ -102,16 +102,7 @@ class erd_pre:
             self.params,
             lr=lr
         )
-       # gparams = T.grad(cost, self.params)
-       # updates = OrderedDict()
-       # for param, gparam in zip(self.params, gparams):
-       #     updates[param] = param - gparam * lr
-       # self.loss = theano.function(inputs = [X, Y], outputs = [cxe, mse, cost])
-       # self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
 
        self.train = theano.function(inputs=[X, Y],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
-
-       #self.train = theano.function(inputs = [X, Y], outputs = cost, updates=updates,allow_input_downcast=True)
        self.predictions = theano.function(inputs = [X], outputs = self.output,allow_input_downcast=True)
-       self.debug = theano.function(inputs = [X, Y], outputs = [X.shape, Y.shape, y_vals.shape, cxe.shape])
        self.n_param=n_lstm*n_lstm*4+n_in*n_lstm*4+n_lstm*n_out+n_lstm*3
