@@ -15,7 +15,7 @@ class erd:
        self.n_lstm = n_lstm
        self.n_out = n_out
        self.nzeros_fc1=500
-       self.n_fc1=512
+       self.n_fc1=1024
        self.n_fc2=512
 
 
