@@ -15,8 +15,8 @@ class erd:
        self.n_lstm = n_lstm
        self.n_out = n_out
        self.nzeros_fc1=500
-       self.n_fc1=1024
-       self.n_fc2=128
+       self.n_fc1=512
+       self.n_fc2=512
 
 
        self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1')
