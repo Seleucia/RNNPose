@@ -16,7 +16,7 @@ def get_params():
    params['resume']= 0
    params['mfile']= "lstm_model_test_4.p"
 
-   params['batch_size']=64
+   params['batch_size']=62
    params['shufle_data']=1
    params['max_count']= 300
 

@@ -20,6 +20,7 @@ def train_rnn(params):
 
    nb_epochs=params['n_epochs']
 
+   print("Batch size: %i, train batch size: %i, test batch size: %i"%(batch_size,n_train_batches,n_test_batches))
    u.log_write("Model build started",params)
    if params['resume']==1:
       model= model_provider.get_model_pretrained(params)
@@ -37,13 +38,13 @@ def train_rnn(params):
           loss = model.train(x, y)
           batch_loss += loss
       if params['shufle_data']==1:
-         X_test,Y_test=du.shuffle_in_unison_inplace(X_test,Y_test)
+         X_train,Y_train=du.shuffle_in_unison_inplace(X_train,Y_train)
       train_errors[epoch_counter] = batch_loss
       batch_loss/=n_train_batches
       s='TRAIN--> epoch %i | error %f'%(epoch_counter, batch_loss)
       u.log_write(s,params)
       best_loss=0
-      if(epoch_counter%5==0):
+      if(epoch_counter%10==0):
           print("Model testing")
           batch_loss = 0.
           batch_loss3d = 0.
@@ -61,6 +62,7 @@ def train_rnn(params):
              best_loss=batch_loss
              ext=str(val_counter%5)+".p"
              u.write_params(model.params,params,ext)
+
           val_counter+=1
           s ='VAL--> epoch %i | error %f, %f '%(val_counter,batch_loss,batch_loss3d)
           u.log_write(s,params)

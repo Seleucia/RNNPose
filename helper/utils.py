@@ -287,8 +287,12 @@ ah=alpha_huber
 def write_params(mparams,params,ext):
     wd=params["wd"]
     filename=params['model']+"_"+params["rn_id"]+"_"+ext
-    with open(wd+"/cp/"+filename,"a") as f:
+    fpath=wd+"/cp/"+filename
+    if os.path.exists(fpath):
+        os.remove(fpath)
+    with open(fpath,"a") as f:
         pickle.dump([param.get_value() for param in mparams], f, protocol=pickle.HIGHEST_PROTOCOL)
+        print("Model saved"+filename)
 
 
 def read_params(params):

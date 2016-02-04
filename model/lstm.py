@@ -32,7 +32,7 @@ class lstm:
 
        self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,
                       self.W_xf, self.W_hf, self.W_cf, self.b_f,
-                      self.W_xc, self.W_hc, self.b_c,
+                      self.W_xc, self.W_hc, self.b_c,  self.W_xo,
                       self.W_ho, self.W_co, self.b_o,
                       self.W_hy, self.b_y]
 

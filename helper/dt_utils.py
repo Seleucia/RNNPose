@@ -70,7 +70,7 @@ def load_train_pose(base_file,max_count,p_count):
    for vw in range(1,12,1):
        for sq in range(4,8,1):
            for sb in range(2,9,1):
-               for fm in range(1,300,1):
+               for fm in range(1,800,1):
                    if len(X_D)>max_count:
                        return (numpy.asarray(X_D),numpy.asarray(Y_D))
                    fl=base_file+"view"+str(vw)+"_seq"+str(sq)+"_subj"+str(sb)+"_frame"+str(fm)+".txt"
