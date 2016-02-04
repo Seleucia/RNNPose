@@ -7,7 +7,23 @@ def plot_histograms(loss):
    x = loss
    bins = 50
    ax.hist(x,bins=bins,color='green')
+   plt.title('Test in 3d for per frame')
+   plt.xlabel('error (x)')
+   plt.ylabel('number of frame (y)')
    plt.show()
+
+def plot_error_frame(loss):
+   import matplotlib.pyplot as plt
+   fig = plt.figure()
+   ax = fig.add_subplot(111)
+   y = loss
+   x = range(len(loss))
+   ax.hist(x,y,color='green')
+   plt.title('Test error in 3d for per frame')
+   plt.xlabel('frame id')
+   plt.ylabel('error')
+   plt.show()
+
 
 
 def plot_cumsum(loss):
