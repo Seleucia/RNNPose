@@ -125,17 +125,20 @@ def get_loss_bb(gt,est,bb_list):
     loss=0
     bb_loss=0
     counter=0
+    loss_list=[]
     for b in range(batch_size):
         for s in range(seq_length):
             diff_vec=np.abs(gt[b][s].reshape(18,3) - est[b][s].reshape(18,3)) #54*3
             bb_vec=bb_list[counter]
             loss_vec=(diff_vec*bb_vec)
-            bb_loss +=np.mean(np.sqrt(np.sum(loss_vec**2,axis=1)))
+            b_l=np.mean(np.sqrt(np.sum(loss_vec**2,axis=1)))
+            loss_list.append(b_l)
+            bb_loss +=b_l
             loss +=np.mean(np.sqrt(np.sum(diff_vec**2,axis=1)))
     bb_loss/=(seq_length*batch_size)
     loss/=(seq_length*batch_size)
 
-    return (loss,bb_loss)
+    return (loss,bb_loss,loss_list)
 
 rng = numpy.random.RandomState(1234)
 srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
