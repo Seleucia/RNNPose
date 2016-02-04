@@ -21,7 +21,10 @@ def train_rnn(params):
    nb_epochs=params['n_epochs']
 
    u.log_write("Model build started",params)
-   model= model_provider.get_model(params)
+   if params['resume']==1:
+      model= model_provider.get_model_pretrained(params)
+   else:
+      model= model_provider.get_model(params)
    u.log_write("Number of parameters: %s"%(model.n_param),params)
    train_errors = np.ndarray(nb_epochs)
    u.log_write("Training started",params)
@@ -56,7 +59,7 @@ def train_rnn(params):
           batch_loss3d/=n_test_batches
           if(best_loss<batch_loss):
              best_loss=batch_loss
-             ext=str(epoch_counter%5)+".p"
+             ext=str(val_counter%5)+".p"
              u.write_params(model.params,params,ext)
           val_counter+=1
           s ='VAL--> epoch %i | error %f, %f '%(val_counter,batch_loss,batch_loss3d)

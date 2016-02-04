@@ -114,11 +114,28 @@ def get_loss(gt,est):
     loss=0
     for b in range(batch_size):
         for s in range(seq_length):
-            loss +=np.mean(np.sqrt(np.sum((gt[b][s].reshape(18,3) - est[b][s].reshape(18,3))**2,axis=1)))
+            diff_vec=np.abs(gt[b][s].reshape(18,3) - est[b][s].reshape(18,3)) #54*3
+            loss +=np.mean(np.sqrt(np.sum(diff_vec**2,axis=1)))
+    loss/=(seq_length*batch_size)
+    return (loss)
+
+def get_loss_bb(gt,est,bb_list):
+    batch_size=gt.shape[0]
+    seq_length=gt.shape[1]
+    loss=0
+    bb_loss=0
+    counter=0
+    for b in range(batch_size):
+        for s in range(seq_length):
+            diff_vec=np.abs(gt[b][s].reshape(18,3) - est[b][s].reshape(18,3)) #54*3
+            bb_vec=bb_list[counter]
+            loss_vec=(diff_vec*bb_vec)
+            bb_loss +=np.mean(np.sqrt(np.sum(loss_vec**2,axis=1)))
+            loss +=np.mean(np.sqrt(np.sum(diff_vec**2,axis=1)))
+    bb_loss/=(seq_length*batch_size)
     loss/=(seq_length*batch_size)
 
-    return loss
-
+    return (loss,bb_loss)
 
 rng = numpy.random.RandomState(1234)
 srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
@@ -274,9 +291,9 @@ def write_params(mparams,params,ext):
         pickle.dump([param.get_value() for param in mparams], f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def read_params(params,filename):
+def read_params(params):
     wd=params["wd"]
-    with open(wd+"/cp/"+filename) as f:
+    with open(wd+"/cp/"+params['mfile']) as f:
         mparams=pickle.load(f)
         return mparams
 
@@ -284,7 +301,8 @@ def set_params(model,mparams):
     counter=0
     for p in mparams:
         model.params[counter].set_value(p)
-    return p
+        counter=counter+1
+    return model
 
 
 

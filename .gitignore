@@ -11,3 +11,4 @@
 *.caffemodel
 *.prototxt
 .idea/
+*.p

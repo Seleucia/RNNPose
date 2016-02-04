@@ -13,6 +13,8 @@ def get_params():
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
+   params['resume']= 1
+   params['mfile']= "lstm_model_test_4.p"
 
    params['batch_size']=64
    params['shufle_data']=1

@@ -6,30 +6,43 @@ import helper.utils as u
 
 params= config.get_params()
 params["model"]="lstm"
-model_file="lstm_model_test_0.p"
+params['mfile']= "lstm_model_test_4.p"
+#0, error 0.087360, 0.177598, 20.323595
+#error 0.078438, 0.161955, 16.453038
+
+
+
 only_test=1
 params['batch_size']=64
 
-(X_test,Y_test)=du.load_pose(params,only_test)
+(X_test,Y_test,N_list)=du.load_pose(params,only_test)
+BB_list=du.load_test_bboxes(params,len(N_list))
 batch_size=params['batch_size']
 
 n_test_batches = len(X_test)
 n_test_batches /= batch_size
 
 print ("Model loading started")
-model= model_provider.get_model_pretrained(params,model_file)
+model= model_provider.get_model_pretrained(params)
 print("Prediction started")
 batch_loss = 0.
 batch_loss3d = 0.
+batch_bb_loss = 0.
 for minibatch_index in range(n_test_batches):
    x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
    y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
+   n_list=N_list[minibatch_index * batch_size*y.shape[1]: (minibatch_index + 1) * batch_size*y.shape[1]]
+   bb_list=BB_list[minibatch_index * batch_size*y.shape[1]: (minibatch_index + 1) * batch_size*y.shape[1]]
    pred = model.predictions(x)
+   du.write_predictions(params,pred,n_list)
    loss=np.mean(np.abs(pred - y))
-   loss3d =u.get_loss(y,pred)
+   (loss3d,bb_loss) =u.get_loss_bb(y,pred,bb_list)
    batch_loss += loss
    batch_loss3d += loss3d
+   batch_bb_loss+=bb_loss
 batch_loss/=n_test_batches
 batch_loss3d/=n_test_batches
-s ='error %f, %f '%(batch_loss,batch_loss3d)
+batch_bb_loss/=n_test_batches
+
+s ='error %f, %f, %f '%(batch_loss,batch_loss3d,batch_bb_loss)
 print (s)
