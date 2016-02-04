@@ -18,7 +18,7 @@ def plot_error_frame(loss):
    ax = fig.add_subplot(111)
    y = loss
    x = range(len(loss))
-   ax.hist(x,y,color='green')
+   plt.plot(x,y,'r--')
    plt.title('Test error in 3d for per frame')
    plt.xlabel('frame id')
    plt.ylabel('error')
