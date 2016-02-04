@@ -47,3 +47,4 @@ batch_bb_loss/=n_test_batches
 s ='error %f, %f, %f '%(batch_loss,batch_loss3d,batch_bb_loss)
 print (s)
 pu.plot_histograms(loss_list)
+pu.plot_cumsum(loss_list)
