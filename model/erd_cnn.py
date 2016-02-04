@@ -14,8 +14,9 @@ class erd:
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
-       self.n_fc1=256
-       self.n_fc2=256
+       self.nzeros_fc1=500
+       self.n_fc1=1024
+       self.n_fc2=512
 
 
        self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1')
@@ -67,8 +68,9 @@ class erd:
                                          sequences=X.dimshuffle(1,0,2),
                                          outputs_info=[h0, c0, None])
 
+       fc_in=y_vals*X.dimshuffle(1,0,2)
        #Hidden layer
-       fc1_out = T.tanh(T.dot(y_vals, self.W_fc1)  + self.b_fc1)
+       fc1_out = T.tanh(T.dot(fc_in, self.W_fc1)  + self.b_fc1)
        fc2_out = T.tanh(T.dot(fc1_out, self.W_fc2)  + self.b_fc2)
 
        self.output=fc2_out.dimshuffle(1,0,2)

@@ -28,8 +28,8 @@ class lstm2:
        self.W_ho_1 = init_weight((self.n_lstm, self.n_lstm), 'W_ho_1', 'svd')
        self.W_co_1 = init_weight((self.n_lstm, self.n_lstm), 'W_co_1', 'svd')
        self.b_o_1 = init_bias(self.n_lstm, sample='zero')
-       self.W_hy_1 = init_weight((self.n_lstm, self.n_out), 'W_hy_1')
-       self.b_y_1 = init_bias(self.n_lstm, sample='zero')
+       #self.W_hy_1 = init_weight((self.n_lstm, self.n_out), 'W_hy_1')
+       #self.b_y_1 = init_bias(self.n_lstm, sample='zero')
 
        #2th layer
        self.W_xi_2 = init_weight((self.n_lstm, self.n_lstm), 'W_xi_2')
@@ -54,11 +54,11 @@ class lstm2:
        self.params = [
                       self.W_xi_1, self.W_hi_1, self.W_ci_1, self.b_i_1,
                       self.W_xf_1, self.W_hf_1, self.W_cf_1, self.b_f_1,
-                      self.W_xc_1, self.W_hc_1, self.b_c_1,  self.W_ho_1,
+                      self.W_xc_1, self.W_hc_1, self.b_c_1, self.W_xo_1, self.W_ho_1,
                       self.W_co_1, self.b_o_1, # self.W_hy_1, self.b_y_1,
                       self.W_xi_2, self.W_hi_2, self.W_ci_2, self.b_i_2,
                       self.W_xf_2, self.W_hf_2, self.W_cf_2, self.b_f_2,
-                      self.W_xc_2, self.W_hc_2, self.b_c_2,  self.W_ho_2,
+                      self.W_xc_2, self.W_hc_2, self.b_c_2, self.W_xo_2,  self.W_ho_2,
                       self.W_co_2, self.b_o_2,  self.W_hy_2, self.b_y_2
                       ]
 
