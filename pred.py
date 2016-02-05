@@ -14,7 +14,7 @@ params['mfile']= "lstm_model_test_1.p"
 
 
 only_test=1
-params["seq_length"]=300
+params["seq_length"]=1024
 (X_test,Y_test,N_list)=du.load_pose(params,only_test)
 BB_list=du.load_test_bboxes(params,len(N_list))
 batch_size=params['batch_size']
