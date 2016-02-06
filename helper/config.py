@@ -62,6 +62,7 @@ def get_params():
        params["n_procc"]=1
        params["WITH_GPU"]=True
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
+       params["data_dir"]="/home/cmp/PycharmProjects/data/rnn/"
        params['n_hidden']= 256
        params['max_count']= 3000000
 
