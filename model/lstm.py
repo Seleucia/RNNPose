@@ -46,9 +46,9 @@ class lstm:
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector
-       Y = T.tensor3() # batch of sequence of vector (should be 0 when X is not null)
+       Y = T.tensor3() # batch of sequence of vector
        h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
-       c0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
+       c0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
 
        [h_vals, c_vals, y_vals], _ = theano.scan(fn=step_lstm,
                                          sequences=X.dimshuffle(1,0,2),

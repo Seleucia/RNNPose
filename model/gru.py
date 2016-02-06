@@ -12,14 +12,14 @@ class gru:
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
-       self.W_xr = init_weight((self.n_in, self.n_lstm), 'W_xi', 'glorot')
-       self.W_hr = init_weight((self.n_lstm, self.n_lstm), 'W_hi', 'ortho')
+       self.W_xr = init_weight((self.n_in, self.n_lstm), 'W_xr', 'glorot')
+       self.W_hr = init_weight((self.n_lstm, self.n_lstm), 'W_hr', 'ortho')
        self.b_r  = init_bias(self.n_lstm, sample='zero')
-       self.W_xz = init_weight((self.n_in, self.n_lstm), 'W_xf', 'glorot')
-       self.W_hz = init_weight((self.n_lstm, self.n_lstm), 'W_hf', 'ortho')
+       self.W_xz = init_weight((self.n_in, self.n_lstm), 'W_xz', 'glorot')
+       self.W_hz = init_weight((self.n_lstm, self.n_lstm), 'W_hz', 'ortho')
        self.b_z = init_bias(self.n_lstm, sample='zero')
-       self.W_xh = init_weight((self.n_in, self.n_lstm), 'W_xc', 'glorot')
-       self.W_hh = init_weight((self.n_lstm, self.n_lstm), 'W_hc', 'ortho')
+       self.W_xh = init_weight((self.n_in, self.n_lstm), 'W_xh', 'glorot')
+       self.W_hh = init_weight((self.n_lstm, self.n_lstm), 'W_hh', 'ortho')
        self.b_h = init_bias(self.n_lstm, sample='zero')
        self.W_hy = init_weight((self.n_lstm, self.n_out),'W_hy', 'glorot')
        self.b_y = init_bias(self.n_out, sample='zero')
@@ -32,13 +32,13 @@ class gru:
        def step_lstm(x_t, h_tm1):
            r_t = T.nnet.sigmoid(T.dot(x_t, self.W_xr) + T.dot(h_tm1, self.W_hr) + self.b_r)
            z_t = T.nnet.sigmoid(T.dot(x_t, self.W_xz) + T.dot(h_tm1, self.W_hz)  + self.b_z)
-           h_t = T.nnet.sigmoid(T.dot(x_t, self.W_xh) + T.dot((r_t*h_tm1),self.W_hh)  + self.b_h)
-           hh_t = z_t * h_tm1 + (1-z_t)*h_t
+           h_t = T.tanh(T.dot(x_t, self.W_xh) + T.dot((r_t*h_tm1),self.W_hh)  + self.b_h)
+           hh_t = z_t * h_tm1 + (T.ones_like(z_t)-z_t)*h_t
            y_t = T.nnet.sigmoid(T.dot(hh_t, self.W_hy) + self.b_y)
            return [h_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector
-       Y = T.tensor3() # batch of sequence of vector (should be 0 when X is not null)
+       Y = T.tensor3() # batch of sequence of vector
        h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
 
        [h_vals, y_vals], _ = theano.scan(fn=step_lstm,
