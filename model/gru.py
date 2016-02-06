@@ -23,6 +23,7 @@ class gru:
        self.b_h = init_bias(self.n_lstm, sample='zero')
        self.W_hy = init_weight((self.n_lstm, self.n_out),'W_hy', 'glorot')
        self.b_y = init_bias(self.n_out, sample='zero')
+       self.one_mat=T.ones((batch_size,n_lstm),dtype=dtype)
 
        self.params = [self.W_xr, self.W_hr, self.b_r,
                       self.W_xz, self.W_hz, self.b_z,
@@ -33,7 +34,7 @@ class gru:
            r_t = T.nnet.sigmoid(T.dot(x_t, self.W_xr) + T.dot(h_tm1, self.W_hr) + self.b_r)
            z_t = T.nnet.sigmoid(T.dot(x_t, self.W_xz) + T.dot(h_tm1, self.W_hz)  + self.b_z)
            h_t = T.tanh(T.dot(x_t, self.W_xh) + T.dot((r_t*h_tm1),self.W_hh)  + self.b_h)
-           hh_t = z_t * h_tm1 + (T.ones_like(z_t)-z_t)*h_t
+           hh_t = z_t * h_tm1 + (1-z_t)*h_t
            y_t = T.nnet.sigmoid(T.dot(hh_t, self.W_hy) + self.b_y)
            return [h_t, y_t]
 
