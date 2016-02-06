@@ -28,6 +28,33 @@ def init_bias(n_out, sample='zero'):
     b = theano.shared(value=b, name='b')
     return b
 
+
+def init_pweight(shape, name, sample='glorot', seed=None):
+    rng = np.random.RandomState(seed)
+
+    if sample == 'glorot':
+        ''' Reference: Glorot & Bengio, AISTATS 2010
+        '''
+        fan_in, fan_out = shape[0],shape[1]
+        s = np.sqrt(2. / (fan_in + fan_out))
+        values=np.random.normal(loc=0.0, scale=s, size=(shape[0],)).astype(dtype)
+    elif sample == 'ortho':
+        ''' From Lasagne. Reference: Saxe et al., http://arxiv.org/abs/1312.6120
+        '''
+        scale=1.1
+        flat_shape = (shape[0], np.prod(shape[1:]))
+        a = np.random.normal(0.0, 1.0, flat_shape)
+        u, _, v = np.linalg.svd(a, full_matrices=False)
+        # pick the one with the correct shape
+        q = u if u.shape == flat_shape else v
+        q = q.reshape(shape)
+        values= np.asarray(scale * q[:shape[0], :shape[1]], dtype=dtype)
+    else:
+        raise ValueError("Unsupported initialization scheme: %s"
+                         % sample)
+
+    return shared(values, name=name, borrow=True)
+
 def init_weight(shape, name, sample='glorot', seed=None):
     rng = np.random.RandomState(seed)
 
@@ -52,8 +79,19 @@ def init_weight(shape, name, sample='glorot', seed=None):
         fan_in, fan_out = shape[0],shape[1]
         s = np.sqrt(2. / (fan_in + fan_out))
         values=np.random.normal(loc=0.0, scale=s, size=shape).astype(dtype)
-
     elif sample == 'ortho':
+        ''' From Lasagne. Reference: Saxe et al., http://arxiv.org/abs/1312.6120
+        '''
+        scale=1.1
+        flat_shape = (shape[0], np.prod(shape[1:]))
+        a = np.random.normal(0.0, 1.0, flat_shape)
+        u, _, v = np.linalg.svd(a, full_matrices=False)
+        # pick the one with the correct shape
+        q = u if u.shape == flat_shape else v
+        q = q.reshape(shape)
+        values= np.asarray(scale * q[:shape[0], :shape[1]], dtype=dtype)
+
+    elif sample == 'ortho1':
         W = rng.uniform(low=-1., high=1., size=shape).astype(dtype)
         u, s, v = numpy.linalg.svd(W)
         values= u.astype(dtype)

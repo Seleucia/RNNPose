@@ -7,7 +7,7 @@ def load_pose(params,only_test=0,only_pose=1):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
-   X_test,Y_test,N_list=load_test_pose_v1(data_dir,max_count,seq_length)
+   X_test,Y_test,N_list=load_test_pose(data_dir,max_count,seq_length)
    if only_test==1:
       return (X_test,Y_test,N_list)
 
@@ -115,6 +115,8 @@ def load_train_pose(base_file,max_count,p_count):
    for vw in range(1,12,1):
        for sq in range(4,8,1):
            for sb in range(2,9,1):
+               X_d=[]
+               Y_d=[]
                for fm in range(1,800,1):
                    if len(X_D)>max_count:
                        return (numpy.asarray(X_D),numpy.asarray(Y_D))

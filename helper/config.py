@@ -48,8 +48,8 @@ def get_params():
        params["WITH_GPU"]=False
        params['n_patch']= 1
        params['n_repeat']= 1
-       params['n_hidden']= 2
-       params['max_count']= 300
+       params['n_hidden']= 128
+       params['max_count']= 1000
 
    if(platform.node()=="milletari-workstation"):
        params["caffe"]="/usr/local/caffe/python"
