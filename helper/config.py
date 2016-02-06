@@ -58,7 +58,7 @@ def get_params():
        params['max_count']= 30000000
 
    if(platform.node()=="cmp-comp"):
-       params['batch_size']=60
+       params['batch_size']=62
        params["n_procc"]=1
        params["WITH_GPU"]=True
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
