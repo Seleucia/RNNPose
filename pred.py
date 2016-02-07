@@ -12,11 +12,11 @@ params['mfile']= "lstm_model_test_1.p"
 #VAL--> epoch 21 | error 0.086701, 0.179906
 
 only_test=1
-params["seq_length"]=1024
+params["seq_length"]=-1
+batch_size=3#params['batch_size']
+
 (X_test,Y_test,N_list)=du.load_pose(params,only_test)
 BB_list=du.load_test_bboxes(params,len(N_list))
-batch_size=params['batch_size']
-params["seq_length"]=-1
 
 n_test = len(X_test)
 residual=n_test%batch_size
@@ -31,17 +31,22 @@ if residual>0:
 n_test_batches =n_test/ batch_size
 print("Batch size: %i, test batch size: %i"%(batch_size,n_test_batches))
 print ("Model loading started")
-model= model_provider.get_model_pretrained(params)
+
 print("Prediction started")
 batch_loss = 0.
 batch_loss3d = 0.
 batch_bb_loss = 0.
 loss_list=[0]
+last_index=0
+first_index=0
 for minibatch_index in range(n_test_batches):
    x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
    y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
-   n_list=N_list[minibatch_index * batch_size*y.shape[1]: (minibatch_index + 1) * batch_size*y.shape[1]]
-   bb_list=BB_list[minibatch_index * batch_size*y.shape[1]: (minibatch_index + 1) * batch_size*y.shape[1]]
+   last_index=first_index+sum([len(i) for i in y])
+   n_list=N_list[first_index:last_index]
+   bb_list=BB_list[first_index:last_index]
+   first_index=last_index
+   model= model_provider.get_model_pretrained(params)
    pred = model.predictions(x)
    if residual>0:
       if(minibatch_index==n_test_batches-1):
