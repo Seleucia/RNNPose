@@ -5,15 +5,15 @@ import helper.dt_utils as du
 import helper.utils as u
 import plot.plot_utils as pu
 params= config.get_params()
-params["model"]="lstm"
-params['mfile']= "lstm_model_test_1.p"
+params["model"]="nlstmnp"
+params['mfile']= "lstmnp_model_test_1.p"
 #0, error 0.087360, 0.177598, 20.323595
 #error 0.078438, 0.161955, 16.453038
 #VAL--> epoch 21 | error 0.086701, 0.179906
 
 only_test=1
 params["seq_length"]=-1
-batch_size=3#params['batch_size']
+batch_size=62#params['batch_size']
 
 (X_test,Y_test,N_list)=du.load_pose(params,only_test)
 BB_list=du.load_test_bboxes(params,len(N_list))
@@ -22,16 +22,21 @@ n_test = len(X_test)
 residual=n_test%batch_size
 if residual>0:
    residual=batch_size-residual
-   na=np.asarray([Y_test[-1]]*residual)
-   Y_test=np.concatenate((Y_test,np.asarray(na)),axis=0)
-   na=np.asarray([X_test[-1]]*residual)
-   X_test=np.concatenate((X_test,np.asarray(na)),axis=0)
+   X_List=X_test.tolist()
+   Y_List=Y_test.tolist()
+   x=X_List[-1]
+   y=Y_List[-1]
+   for i in range(residual):
+      X_List.append(x)
+      Y_List.append(y)
+   X_test=np.asarray(X_List)
+   Y_test=np.asarray(Y_List)
    n_test = len(Y_test)
 
 n_test_batches =n_test/ batch_size
 print("Batch size: %i, test batch size: %i"%(batch_size,n_test_batches))
 print ("Model loading started")
-
+model= model_provider.get_model_pretrained(params)
 print("Prediction started")
 batch_loss = 0.
 batch_loss3d = 0.
@@ -46,7 +51,6 @@ for minibatch_index in range(n_test_batches):
    n_list=N_list[first_index:last_index]
    bb_list=BB_list[first_index:last_index]
    first_index=last_index
-   model= model_provider.get_model_pretrained(params)
    pred = model.predictions(x)
    if residual>0:
       if(minibatch_index==n_test_batches-1):
