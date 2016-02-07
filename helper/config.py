@@ -54,7 +54,7 @@ def get_params():
    if(platform.node()=="milletari-workstation"):
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
-       params['n_hidden']= 256
+       params['n_hidden']= 128
        params['max_count']= 30000000
 
    if(platform.node()=="cmp-comp"):
