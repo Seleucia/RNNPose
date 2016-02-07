@@ -12,34 +12,63 @@ class lstmnp:
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
-       self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi', 'glorot')
-       self.W_hi = init_weight((self.n_lstm, self.n_lstm),'W_hi', 'ortho')
-       self.b_i  = init_bias(self.n_lstm, sample='zero')
-       self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf', 'glorot')
-       self.W_hf = init_weight((self.n_lstm, self.n_lstm),'W_hf', 'ortho')
-       self.b_f = init_bias(self.n_lstm, sample='one')
-       self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc', 'glorot')
-       self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'ortho')
-       self.b_c = init_bias(self.n_lstm, sample='zero')
-       self.W_xo = init_weight((self.n_in, self.n_lstm),'W_xo', 'glorot')
-       self.W_ho = init_weight((self.n_lstm, self.n_lstm),'W_ho', 'ortho')
-       self.b_o = init_bias(self.n_lstm, sample='zero')
-       self.W_hy = init_weight((self.n_lstm, self.n_out),'W_hy', 'glorot')
-       self.b_y = init_bias(self.n_out, sample='zero')
+       #Forward weights
+       self.W_xi_f = init_weight((self.n_in, self.n_lstm), 'W_xi', 'glorot')
+       self.W_hi_f = init_weight((self.n_lstm, self.n_lstm), 'W_hi', 'ortho')
+       self.b_i_f  = init_bias(self.n_lstm, sample='zero')
+       self.W_xf_f = init_weight((self.n_in, self.n_lstm), 'W_xf', 'glorot')
+       self.W_hf_f = init_weight((self.n_lstm, self.n_lstm), 'W_hf', 'ortho')
+       self.b_f_f = init_bias(self.n_lstm, sample='one')
+       self.W_xc_f = init_weight((self.n_in, self.n_lstm), 'W_xc', 'glorot')
+       self.W_hc_f = init_weight((self.n_lstm, self.n_lstm), 'W_hc', 'ortho')
+       self.b_c_f = init_bias(self.n_lstm, sample='zero')
+       self.W_xo_f = init_weight((self.n_in, self.n_lstm), 'W_xo', 'glorot')
+       self.W_ho_f = init_weight((self.n_lstm, self.n_lstm), 'W_ho', 'ortho')
+       self.b_o_f = init_bias(self.n_lstm, sample='zero')
+       self.W_hy_f = init_weight((self.n_lstm, self.n_out), 'W_hy', 'glorot')
+       self.b_y_f = init_bias(self.n_out, sample='zero')
 
-       self.params = [self.W_xi, self.W_hi, self.b_i,
-                      self.W_xf, self.W_hf,  self.b_f,
-                      self.W_xc, self.W_hc, self.b_c,  self.W_xo,
-                      self.W_ho, self.b_o,
-                      self.W_hy, self.b_y]
+       #Backward weights
+       self.W_xi_b = init_weight((self.n_in, self.n_lstm), 'W_xi', 'glorot')
+       self.W_hi_b = init_weight((self.n_lstm, self.n_lstm), 'W_hi', 'ortho')
+       self.b_i_b  = init_bias(self.n_lstm, sample='zero')
+       self.W_xf_b = init_weight((self.n_in, self.n_lstm), 'W_xf', 'glorot')
+       self.W_hf_b = init_weight((self.n_lstm, self.n_lstm), 'W_hf', 'ortho')
+       self.b_f_b = init_bias(self.n_lstm, sample='one')
+       self.W_xc_b = init_weight((self.n_in, self.n_lstm), 'W_xc', 'glorot')
+       self.W_hc_b = init_weight((self.n_lstm, self.n_lstm), 'W_hc', 'ortho')
+       self.b_c_b = init_bias(self.n_lstm, sample='zero')
+       self.W_xo_b = init_weight((self.n_in, self.n_lstm), 'W_xo', 'glorot')
+       self.W_ho_b = init_weight((self.n_lstm, self.n_lstm), 'W_ho', 'ortho')
+       self.b_o_b = init_bias(self.n_lstm, sample='zero')
+       self.W_hy_b = init_weight((self.n_lstm, self.n_out), 'W_hy', 'glorot')
+       self.b_y_b = init_bias(self.n_out, sample='zero')
 
-       def step_lstm(x_t, h_tm1, c_tm1):
-           i_t = T.nnet.sigmoid(T.dot(x_t, self.W_xi) + T.dot(h_tm1, self.W_hi) + self.b_i)
-           f_t = T.nnet.sigmoid(T.dot(x_t, self.W_xf) + T.dot(h_tm1, self.W_hf) + self.b_f)
-           c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
-           o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + self.b_o)
+       self.params = [self.W_xi_f, self.W_hi_f, self.b_i_f, self.W_xf_f,
+                      self.W_hf_f, self.b_f_f,  self.W_xc_f, self.W_hc_f,
+                      self.b_c_f, self.W_xo_f, self.W_ho_f, self.b_o_f,
+                      self.W_hy_f, self.b_y_f,
+                      self.W_xi_b, self.W_hi_b, self.b_i_b, self.W_xf_b,
+                      self.W_hf_b, self.b_f_b,  self.W_xc_b, self.W_hc_b,
+                      self.b_c_b, self.W_xo_b, self.W_ho_b, self.b_o_b,
+                      self.W_hy_b, self.b_y_b]
+
+       def f_step_lstm(x_t, h_tm1, c_tm1):
+           i_t = T.nnet.sigmoid(T.dot(x_t, self.W_xi_f) + T.dot(h_tm1, self.W_hi_f) + self.b_i_f)
+           f_t = T.nnet.sigmoid(T.dot(x_t, self.W_xf_f) + T.dot(h_tm1, self.W_hf_f) + self.b_f_f)
+           c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc_f) + T.dot(h_tm1, self.W_hc_f) + self.b_c_f)
+           o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo_f) + T.dot(h_tm1, self.W_ho_f) + self.b_o_f)
            h_t = o_t * T.tanh(c_t)
-           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy) + self.b_y)
+           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy_f) + self.b_y_f)
+           return [h_t, c_t, y_t]
+
+       def b_step_lstm(x_t, h_tm1, c_tm1):
+           i_t = T.nnet.sigmoid(T.dot(x_t, self.W_xi_b) + T.dot(h_tm1, self.W_hi_b) + self.b_i_b)
+           f_t = T.nnet.sigmoid(T.dot(x_t, self.W_xf_b) + T.dot(h_tm1, self.W_hf_b) + self.b_f_b)
+           c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc_b) + T.dot(h_tm1, self.W_hc_b) + self.b_c_b)
+           o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo_b) + T.dot(h_tm1, self.W_ho_b) + self.b_o_b)
+           h_t = o_t * T.tanh(c_t)
+           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy_b) + self.b_y_b)
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector
@@ -47,7 +76,7 @@ class lstmnp:
        h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
        c0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
 
-       [h_vals, c_vals, y_vals], _ = theano.scan(fn=step_lstm,
+       [h_vals, c_vals, y_vals], _ = theano.scan(fn=f_step_lstm,
                                          sequences=X.dimshuffle(1,0,2),
                                          outputs_info=[h0, c0, None])
 

@@ -96,12 +96,17 @@ def load_test_pose(base_file,max_count,p_count):
                            y_d.append(floatVal[0])
                            data = f.read(4)
                        Y_d.append(numpy.asarray(y_d))
-                   if len(X_d)>p_count:
+                   if len(X_d)>p_count and p_count>0:
                        X_D.append(X_d)
                        Y_D.append(Y_d)
                        X_d=[]
                        Y_d=[]
                        p_index=p_index+1
+               if p_count==-1:
+                  X_D.append(X_d)
+                  Y_D.append(Y_d)
+               X_d=[]
+               Y_d=[]
 
    return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
 
