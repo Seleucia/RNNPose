@@ -68,6 +68,9 @@ class lstmnp:
             self.params,
             lr=lr
         )
+       def reset():
+           h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype))
+           c0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype))
 
 
        self.train = theano.function(inputs=[X, Y],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)

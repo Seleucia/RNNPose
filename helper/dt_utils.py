@@ -72,6 +72,8 @@ def load_test_pose(base_file,max_count,p_count):
    for vw in range(1,12,1):
        for sq in range(1,4,1):
            for sb in range(1,2,1):
+               X_d=[]
+               Y_d=[]
                for fm in range(1,1200,1):
                    if len(X_D)>max_count:
                        return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
@@ -102,11 +104,12 @@ def load_test_pose(base_file,max_count,p_count):
                        X_d=[]
                        Y_d=[]
                        p_index=p_index+1
-               if p_count==-1:
+
+               if p_count==-1 and len(X_d)>0:
                   X_D.append(X_d)
                   Y_D.append(Y_d)
-               X_d=[]
-               Y_d=[]
+                  p_index=p_index+1
+
 
    return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
 
