@@ -36,7 +36,7 @@ def get_params():
 
    # learning parameters
    params['momentum']=0.9    # the params for momentum
-   params['initial_learning_rate']=0.0001
+   params['initial_learning_rate']=0.001
    params['learning_rate_decay']= 0.998
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600
@@ -54,7 +54,7 @@ def get_params():
    if(platform.node()=="milletari-workstation"):
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
-       params['n_hidden']= 128
+       params['n_hidden']= 256
        params['max_count']= 30000000
 
    if(platform.node()=="cmp-comp"):
