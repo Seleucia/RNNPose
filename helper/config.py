@@ -68,7 +68,7 @@ def get_params():
 
    #params['step_size']=[10]
    params['test_size']=0.20 #Test size
-   params['val_size']=0.20 #Test size
+   params['val_size']=0.20 #val size
    params['test_freq']=100 #Test frequency
    return params
 
