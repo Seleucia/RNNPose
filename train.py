@@ -4,6 +4,7 @@ import helper.config as config
 import model.model_provider as model_provider
 import helper.dt_utils as du
 import helper.utils as u
+import theano
 
 
 def train_rnn(params):
@@ -25,7 +26,7 @@ def train_rnn(params):
    if params['resume']==1:
       model= model_provider.get_model_pretrained(params)
    else:
-      model= model_provider.get_model(params)
+     model= model_provider.get_model(params)
    u.log_write("Number of parameters: %s"%(model.n_param),params)
    train_errors = np.ndarray(nb_epochs)
    u.log_write("Training started",params)
@@ -35,7 +36,11 @@ def train_rnn(params):
       for minibatch_index in range(n_train_batches):
           x=X_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
           y=Y_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]#60*20*54
-          loss = model.train(x, y)
+          if(params["model"]=="blstmnp"):
+             x_b=np.asarray(map(np.flipud,x))
+             loss = model.train(x,x_b,y)
+          else:
+             loss = model.train(x, y)
           batch_loss += loss
       if params['shufle_data']==1:
          X_train,Y_train=du.shuffle_in_unison_inplace(X_train,Y_train)
@@ -51,7 +56,12 @@ def train_rnn(params):
           for minibatch_index in range(n_test_batches):
              x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
              y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
-             pred = model.predictions(x)
+             if(params["model"]=="blstmnp"):
+                x_b=np.asarray(map(np.flipud,x))
+                pred = model.predictions(x,x_b)
+             else:
+                pred = model.predictions(x)
+
              loss=np.mean(np.abs(pred - y))
              loss3d =u.get_loss(y,pred)
              batch_loss += loss

@@ -9,7 +9,7 @@ def get_params():
    params['run_mode']=1 #0,full,1:only for check, 2: very small ds, 3:only ICL data
    params["rn_id"]="model_test" #running id, model
    params["notes"]="Im testing my data loading approach" #running id
-   params["model"]="erd"#kccnr,dccnr
+   params["model"]="blstmnp"#kccnr,dccnr
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
@@ -48,8 +48,8 @@ def get_params():
        params["WITH_GPU"]=False
        params['n_patch']= 1
        params['n_repeat']= 1
-       params['n_hidden']= 128
-       params['max_count']= 1000
+       params['n_hidden']= 2
+       params['max_count']= 100
 
    if(platform.node()=="milletari-workstation"):
        params["caffe"]="/usr/local/caffe/python"
