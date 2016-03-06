@@ -35,7 +35,9 @@ class gru:
            z_t = T.nnet.sigmoid(T.dot(x_t, self.W_xz) + T.dot(h_tm1, self.W_hz)  + self.b_z)
            h_t = T.tanh(T.dot(x_t, self.W_xh) + T.dot((r_t*h_tm1),self.W_hh)  + self.b_h)
            hh_t = z_t * h_tm1 + (1-z_t)*h_t
-           y_t = T.nnet.sigmoid(T.dot(hh_t, self.W_hy) + self.b_y)
+           #y_t = T.nnet.sigmoid(T.dot(hh_t, self.W_hy) + self.b_y)
+           y_t = T.tanh(T.dot(hh_t, self.W_hy) + self.b_y)
+           #y_t = T.dot(hh_t, self.W_hy) + self.b_y
            return [h_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector

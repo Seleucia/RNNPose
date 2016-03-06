@@ -21,7 +21,7 @@ def get_model(params):
     elif(params["model"]=="erd_pre"):
         model = erd_pre(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
     elif(params["model"]=="gru"):
-        model = gru(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
+        model = gru(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=ClipRMSprop)
     elif(params["model"]=="blstmnp"):
         model = blstmnp(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
     else:

@@ -13,8 +13,8 @@ def get_params():
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
-   params['resume']= 0
-   params['mfile']= "lstm_model_test_4.p"
+   params['resume']= 1
+   params['mfile']= "gru_model_test_x.p"
 
    params['batch_size']=62
    params['shufle_data']=1
@@ -26,7 +26,7 @@ def get_params():
    params['wd']=wd
    params['log_file']=wd+"/logs/"+params["model"]+"_"+params["rn_id"]+"_"+str(params['run_mode'])+"_"+utils.get_time()+".txt"
    params["model_file"]=wd+"/cp/"
-   params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/"
+   params["data_dir"]="/home/coskun/PycharmProjects/data/hc/features/"
 
 
    # early-stopping parameters
@@ -36,19 +36,19 @@ def get_params():
 
    # learning parameters
    params['momentum']=0.9    # the params for momentum
-   params['initial_learning_rate']=0.001
+   params['initial_learning_rate']=0.00001
    params['learning_rate_decay']= 0.998
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600
    params['n_hidden']= 512
 
-   if(platform.node()=="hc"):
+   if(platform.node()=="coskunh"):
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
        params['batch_size']=10
        params["WITH_GPU"]=False
        params['n_patch']= 1
        params['n_repeat']= 1
-       params['n_hidden']= 2
+       params['n_hidden']= 128
        params['max_count']= 100
 
    if(platform.node()=="milletari-workstation"):

@@ -31,7 +31,7 @@ class RMSprop:
 
 
 class ClipRMSprop:
-    def __init__(self, cost, params, lr=0.001, rho=0.9, epsilon=1e-6, momentum=0.,rescale=5.):
+    def __init__(self, cost, params, lr=0.001, rho=0.9, epsilon=1e-6, momentum=0.9,rescale=5.):
         self.cost = cost
         self.params = params
         self.momentum = momentum

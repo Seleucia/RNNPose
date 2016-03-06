@@ -2,15 +2,13 @@ import numpy
 import theano
 import theano.tensor as T
 import os
-import glob
-from PIL import Image
 import datetime
 import numpy as np
-from random import randint
 from theano import shared
 import pickle
 
 dtype = T.config.floatX
+
 
 def numpy_floatX(data):
     return numpy.asarray(data, dtype=T.config.floatX)
@@ -152,7 +150,7 @@ def get_loss(gt,est):
     loss=0
     for b in range(batch_size):
         for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(18,3) - est[b][s].reshape(18,3)) #54*3
+            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3)) #54*3
             loss +=np.mean(np.sqrt(np.sum(diff_vec**2,axis=1)))
     loss/=(seq_length*batch_size)
     return (loss)
@@ -166,7 +164,7 @@ def get_loss_bb(gt,est,bb_list):
     loss_list=[]
     for b in range(batch_size):
         for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(18,3) - est[b][s].reshape(18,3)) #54*3
+            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3)) #54*3
             bb_vec=bb_list[counter]
             loss_vec=(diff_vec*bb_vec)
             b_l=np.mean(np.sqrt(np.sum(loss_vec**2,axis=1)))
@@ -345,7 +343,14 @@ def read_params(params):
 def set_params(model,mparams):
     counter=0
     for p in mparams:
-        model.params[counter].set_value(p)
+        if(counter<(len(mparams)-2)):
+                model.params[counter].set_value(p)
+        # if(counter==(len(mparams)-1)):
+        #     model.params[counter].set_value(p[0:39])
+        # elif(counter==(len(mparams)-2)):
+        #     model.params[counter].set_value(p[:,0:39])
+        # else:
+        #     model.params[counter].set_value(p)
         counter=counter+1
     return model
 
