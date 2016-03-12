@@ -3,7 +3,7 @@ import struct
 import os
 import numpy
 from sklearn.preprocessing import normalize
-
+from sklearn.preprocessing import scale
 
 def load_pose(params,only_test=0,only_pose=1):
    data_dir=params["data_dir"]
@@ -18,165 +18,157 @@ def load_pose(params,only_test=0,only_pose=1):
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
 
    #norm=numpy.linalg.norm(X_test)
-   norm=5000;#numpy.linalg.norm(X_test)
+   norm=2#numpy.linalg.norm(X_test)
+
    Y_test=Y_test/norm
    Y_train=Y_train/norm
 
-   norm=numpy.linalg.norm(X_test)
-   X_test=X_test/norm
-
-   norm=numpy.linalg.norm(X_train)
-   X_train=X_train/norm
-
+   #norm=numpy.linalg.norm(X_test)
+   X_test=(X_test -numpy.min(X_test)) / (numpy.max(X_test) -numpy.min(X_test))
+   X_train=(X_train -numpy.min(X_train)) / (numpy.max(X_train) -numpy.min(X_train))
 
    return (X_train,Y_train,X_test,Y_test)
 
 
 def load_test_pose_v1(base_file,max_count,p_count):
-   base_file=base_file+"test/"
-   ft_prefix="featureVec1024"
-   gt_prefix="joints_sync"
-   #joints_sync_getUp1_Huseyin_frame1300
-   #featureVec1024_calib_Huseyin_view360_frame2,featureVec1024_getUp_Huseyin_view360_frame380
-   sbl=["Huseyin"]#range(1,1,1):
-   sql=["calib","getUp"]#range(3,3,1);
-   X_D=[]
-   Y_D=[]
-   p_index=0
-   X_d=[]
-   Y_d=[]
-   N_L=[]
-   for vw in range(360,360,1):
-       for sq in sql:
-           for sb in sbl:
-               for fm in range(1,1200,1):
-                   if len(X_D)>max_count:
-                       return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
-                   #fl=base_file+ft_prefix+str(vw)+"_seq"+str(sq)+"_subj"+str(sb)+"_frame"+str(fm)+".txt"
-                   #gl=base_file+gt_prefix+str(vw)+"_seq"+str(sq)+"_subj"+str(sb)+"_frame"+str(fm)+".txt"
-                   fl=base_file+ft_prefix+"_"+str(sq)+"_"+str(sb)+"_view"+str(vw)+"_frame380"+str(fm)+".txt"
-                   gl=base_file+gt_prefix+"_"+str(sq)+"_"+str(sb)+"_frame"+str(fm)+".txt"
-                   if not os.path.isfile(fl):
-                       continue
-                   N_L.append(fl)
-                   with open(fl, "rb") as f:
-                       data = f.read(4)
-                       x_d=[]
-                       while data != "":
-                           floatVal = struct.unpack('f', data)
-                           x_d.append(floatVal[0])
-                           data = f.read(4)
-                       X_d.append(numpy.asarray(x_d))
-                   with open(gl, "rb") as f:
-                       data = f.read(4)
-                       y_d=[]
-                       while data != "":
-                           floatVal = struct.unpack('f', data)
-                           y_d.append(floatVal[0])
-                           data = f.read(4)
-                       Y_d.append(numpy.asarray(y_d))
-                   if len(X_d)>p_count:
-                       X_D.append(X_d)
-                       Y_D.append(Y_d)
-                       X_d=[]
-                       Y_d=[]
-                       p_index=p_index+1
+    base_file=base_file+"test/"
+    ft_prefix="feature_"
+    gt_prefix="label_"
+    #feature_seq13_frame2.txt
+    #featureVec1024_calib_Huseyin_view360_frame2,featureVec1024_getUp_Huseyin_view360_frame380
+    #sbl=["Huseyin"]#range(1,1,1):
+    sql=range(13,15,1);
+    X_D=[]
+    Y_D=[]
+    p_index=0
+    X_d=[]
+    Y_d=[]
+    N_L=[]
+    for sq in sql:
+       for fm in range(1,1800,1):
+           if len(X_D)>max_count:
+               return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
+           #fl=base_file+ft_prefix+str(vw)+"_seq"+str(sq)+"_subj"+str(sb)+"_frame"+str(fm)+".txt"
+           #gl=base_file+gt_prefix+str(vw)+"_seq"+str(sq)+"_subj"+str(sb)+"_frame"+str(fm)+".txt"
+           fl=base_file+ft_prefix+"_seq"+str(sq)+"_frame"+str(fm)+".txt"
+           gl=base_file+gt_prefix+"_seq"+str(sq)+"_frame"+str(fm)+".txt"
+           if not os.path.isfile(fl):
+               continue
+           N_L.append(fl)
+           with open(fl, "rb") as f:
+               data = f.read(4)
+               x_d=[]
+               while data != "":
+                   floatVal = struct.unpack('f', data)
+                   x_d.append(floatVal[0])
+                   data = f.read(4)
+               X_d.append(numpy.asarray(x_d))
+           with open(gl, "rb") as f:
+               data = f.read(4)
+               y_d=[]
+               while data != "":
+                   floatVal = struct.unpack('f', data)
+                   y_d.append(floatVal[0])
+                   data = f.read(4)
+               Y_d.append(numpy.asarray(y_d))
+           if len(X_d)>p_count:
+               X_D.append(X_d)
+               Y_D.append(Y_d)
+               X_d=[]
+               Y_d=[]
+               p_index=p_index+1
 
-   return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
+    return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
 
 def load_test_pose(base_file,max_count,p_count):
-   base_file=base_file+"test/"
-   ft_prefix="featureVec1024"
-   gt_prefix="joints_sync"
-   #joints_sync_getUp1_Huseyin_frame1300
-   #featureVec1024_calib_Huseyin_view360_frame2,featureVec1024_getUp_Huseyin_view360_frame380
-   sbl=["Huseyin"]#range(1,2,1):
-   sql=["getUp"]#(1,4,1):
-   X_D=[]
-   Y_D=[]
-   p_index=0
-   X_d=[]
-   Y_d=[]
-   N_L=[]
-   for vw in range(360,361,1):
-       for sq in sql:
-           for sb in sbl:
+    base_file=base_file+"test/"
+    ft_prefix="feature_"
+    gt_prefix="label_"
+    #feature_seq13_frame2.txt
+    #featureVec1024_calib_Huseyin_view360_frame2,featureVec1024_getUp_Huseyin_view360_frame380
+    #sbl=["Huseyin"]#range(1,1,1):
+    sql=range(13,15,1);
+    X_D=[]
+    Y_D=[]
+    p_index=0
+    X_d=[]
+    Y_d=[]
+    N_L=[]
+    for sq in sql:
+        X_d=[]
+        Y_d=[]
+        for fm in range(0,1801,1):
+           if len(X_D)>max_count:
+               return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
+           fl=base_file+ft_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
+           gl=base_file+gt_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
+           if not os.path.isfile(gl):
+               continue
+           N_L.append(fl)
+           with open(fl, "rb") as f:
+               data=f.read().strip().split(' ')
+               x_d = [float(val) for val in data]
+               X_d.append(numpy.asarray(x_d))
+           with open(gl, "rb") as f:
+              data=f.read().strip().split(' ')
+              y_d= [float(val) for val in data]
+              Y_d.append(numpy.asarray(y_d))
+           if len(X_d)>p_count and p_count>0:
+               X_D.append(X_d)
+               Y_D.append(Y_d)
                X_d=[]
                Y_d=[]
-               for fm in range(1300,1801,1):
-                   if len(X_D)>max_count:
-                       return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
-                   fl=base_file+ft_prefix+"_"+str(sq)+"_"+str(sb)+"_view"+str(vw)+"_frame"+str(fm)+".txt"
-                   gl=base_file+gt_prefix+"_"+str(sq)+"_"+str(sb)+"_frame"+str(fm)+".txt"
-                   if not os.path.isfile(gl):
-                       continue
-                   N_L.append(fl)
-                   with open(fl, "rb") as f:
-                       data=f.read().strip().split(' ')
-                       x_d = [float(val) for val in data]
-                       X_d.append(numpy.asarray(x_d))
-                   with open(gl, "rb") as f:
-                      data=f.read().strip().split(' ')
-                      y_d= [float(val) for val in data]
-                      Y_d.append(numpy.asarray(y_d))
-                   if len(X_d)>p_count and p_count>0:
-                       X_D.append(X_d)
-                       Y_D.append(Y_d)
-                       X_d=[]
-                       Y_d=[]
-                       p_index=p_index+1
+               p_index=p_index+1
 
-               if p_count==-1 and len(X_d)>0:
-                  X_D.append(X_d)
-                  Y_D.append(Y_d)
-                  p_index=p_index+1
+        if p_count==-1 and len(X_d)>0:
+          X_D.append(X_d)
+          Y_D.append(Y_d)
+          p_index=p_index+1
 
 
-   return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
+    return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
 
 def load_train_pose(base_file,max_count,p_count):
-   base_file=base_file+"train/"
-   ft_prefix="featureVec1024"
-   gt_prefix="joints_sync"
-   #joints_sync_getUp1_Huseyin_frame1300
-   #featureVec1024_calib_Huseyin_view360_frame2,featureVec1024_getUp_Huseyin_view360_frame380
-   sbl=["Huseyin"]#range(1,2,1):
-   sql=["getUp","drink","calib"]#(1,4,1):
-   X_D=[]
-   Y_D=[]
-   p_index=0
-   X_d=[]
-   Y_d=[]
-   for vw in range(360,361,1):
-       for sq in sql:
-           for sb in sbl:
+    base_file=base_file+"train/"
+    ft_prefix="feature_"
+    gt_prefix="label_"
+    #feature_seq13_frame2.txt
+    #featureVec1024_calib_Huseyin_view360_frame2,featureVec1024_getUp_Huseyin_view360_frame380
+    #sbl=["Huseyin"]#range(1,1,1):
+    sql=range(1,15,1);
+    X_D=[]
+    Y_D=[]
+    p_index=0
+    X_d=[]
+    Y_d=[]
+    for sq in sql:
+        X_d=[]
+        Y_d=[]
+        for fm in range(1,800,1):
+            if len(X_D)>max_count:
+               return (numpy.asarray(X_D),numpy.asarray(Y_D))
+            fl=base_file+ft_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
+            gl=base_file+gt_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
+            if not os.path.isfile(fl):
+               continue
+
+            with open(fl, "rb") as f:
+               data=f.read().strip().split(' ')
+               x_d = [float(val) for val in data]
+               X_d.append(numpy.asarray(x_d))
+            with open(gl, "rb") as f:
+              data=f.read().strip().split(' ')
+              y_d= [float(val) for val in data]
+              Y_d.append(numpy.asarray(y_d))
+
+            if len(X_d)>p_count:
+               X_D.append(X_d)
+               Y_D.append(Y_d)
                X_d=[]
                Y_d=[]
-               for fm in range(1,800,1):
-                   if len(X_D)>max_count:
-                       return (numpy.asarray(X_D),numpy.asarray(Y_D))
-                   fl=base_file+ft_prefix+"_"+str(sq)+"_"+str(sb)+"_view"+str(vw)+"_frame"+str(fm)+".txt"
-                   gl=base_file+gt_prefix+"_"+str(sq).replace("1","")+"_"+str(sb)+"_frame"+str(fm)+".txt"#There shou
-                   if not os.path.isfile(fl):
-                       continue
+               p_index=p_index+1
 
-                   with open(fl, "rb") as f:
-                       data=f.read().strip().split(' ')
-                       x_d = [float(val) for val in data]
-                       X_d.append(numpy.asarray(x_d))
-                   with open(gl, "rb") as f:
-                      data=f.read().strip().split(' ')
-                      y_d= [float(val) for val in data]
-                      Y_d.append(numpy.asarray(y_d))
-
-                   if len(X_d)>p_count:
-                       X_D.append(X_d)
-                       Y_D.append(Y_d)
-                       X_d=[]
-                       Y_d=[]
-                       p_index=p_index+1
-
-   return (numpy.asarray(X_D),numpy.asarray(Y_D))
+    return (numpy.asarray(X_D),numpy.asarray(Y_D))
 
 def load_test_bboxes(params,max_count):
    data_dir=params["data_dir"]

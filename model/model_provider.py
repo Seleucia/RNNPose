@@ -11,7 +11,7 @@ import theano
 
 def get_model(params):
     if(params["model"]=="lstm"):
-        model = lstm(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
+        model = lstm(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
     elif(params["model"]=="lstmnp"):
         model = lstmnp(1024, params['n_hidden'], 54,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
     elif(params["model"]=="lstm2"):
