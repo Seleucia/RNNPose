@@ -50,7 +50,7 @@ class erd_pre:
 
        self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,
                       self.W_xf, self.W_hf, self.W_cf, self.b_f,
-                      self.W_xc, self.W_hc, self.b_c,
+                      self.W_xc, self.W_hc, self.b_c,self.W_xo,
                       self.W_ho, self.W_co, self.b_o,
                       self.W_hy, self.b_y,self.W_fc1, self.b_fc1,self.W_fc2, self.b_fc2,
                       self.W_prefc1, self.b_prefc1,self.W_prefc2, self.b_prefc2]
@@ -63,7 +63,7 @@ class erd_pre:
            c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
            o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + T.dot(c_t, self.W_co)  + self.b_o)
            h_t = o_t * T.tanh(c_t)
-           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy) + self.b_y)
+           y_t = T.tanh(T.dot(h_t, self.W_hy) + self.b_y)
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector
