@@ -10,7 +10,7 @@ def get_params():
    params["notes"]="Im testing my data loading approach" #running id
    params["model"]="blstmnp"#kccnr,dccnr
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
-   params['seq_length']= 30
+   params['seq_length']= 20
    params['validate']= 1
    params['resume']= 0
    params['mfile']= "gru_model_test_x.p"
