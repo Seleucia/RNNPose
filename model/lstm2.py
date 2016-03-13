@@ -2,7 +2,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_bias
+from helper.utils import init_weight,init_pweight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
@@ -76,7 +76,7 @@ class lstm2:
            c_t_2 = f_t_2 * c_tm2 + i_t_2 * T.tanh(T.dot(h_t_1, self.W_xc_2) + T.dot(h_tm2, self.W_hc_2) + self.b_c_2)
            o_t_2 = T.nnet.sigmoid(T.dot(h_t_1, self.W_xo_2) + T.dot(h_tm2, self.W_ho_2) + T.dot(c_t_2, self.W_co_2) + self.b_o_2)
            h_t_2 = o_t_2 * T.tanh(c_t_2)
-           y_t_2 = T.nnet.sigmoid(T.dot(h_t_2, self.W_hy_2) + self.b_y_2)
+           y_t_2 = T.tanh(T.dot(h_t_2, self.W_hy_2) + self.b_y_2)
 
            return [h_t_1,c_t_1,h_t_2,c_t_2, y_t_2]
 
@@ -91,18 +91,7 @@ class lstm2:
                                          sequences=X.dimshuffle(1,0,2),
                                          outputs_info=[h0_1, c0_1,h0_2, c0_2, None])
        self.output = y_vals.dimshuffle(1,0,2)
-
-       cxe = T.mean(T.nnet.binary_crossentropy(self.output, Y))
-       nll = -T.mean(Y * T.log(self.output)+ (1.- Y) * T.log(1. - self.output))
-       mse = T.mean((self.output - Y) ** 2)
-
-       cost = 0
-       if cost_function == 'mse':
-           cost = mse
-       elif cost_function == 'cxe':
-           cost = cxe
-       else:
-           cost = nll
+       cost=get_err_fn(self,cost_function,Y)
        _optimizer = optimizer(
             cost,
             self.params,

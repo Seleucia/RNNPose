@@ -2,7 +2,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_bias
+from helper.utils import init_weight,init_pweight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
 import helper.utils as u
 dtype = T.config.floatX
@@ -56,7 +56,7 @@ class erd:
            c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
            o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + T.dot(c_t, self.W_co)  + self.b_o)
            h_t = o_t * T.tanh(c_t)
-           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy) + self.b_y)
+           y_t = T.tanh(T.dot(h_t, self.W_hy) + self.b_y)
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector
@@ -75,17 +75,8 @@ class erd:
 
        self.output=fc2_out.dimshuffle(1,0,2)
 
-       cxe = T.mean(T.nnet.binary_crossentropy(self.output, Y))
-       nll = -T.mean(Y * T.log(self.output)+ (1.- Y) * T.log(1. - self.output))
-       mse = T.mean((self.output - Y) ** 2)
+       cost=get_err_fn(self,cost_function,Y)
 
-       cost = 0
-       if cost_function == 'mse':
-           cost = mse
-       elif cost_function == 'cxe':
-           cost = cxe
-       else:
-           cost = nll
        _optimizer = optimizer(
             cost,
             self.params,
