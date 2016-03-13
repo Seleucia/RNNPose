@@ -42,6 +42,7 @@ class gru:
 
        X = T.tensor3() # batch of sequence of vector
        Y = T.tensor3() # batch of sequence of vector
+       #Y_NaN= T.tensor3() # batch of sequence of vector
        h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
 
        [h_vals, y_vals], _ = theano.scan(fn=step_lstm,
@@ -49,9 +50,17 @@ class gru:
                                          outputs_info=[h0, None])
 
        self.output = y_vals.dimshuffle(1,0,2)
+
        cxe = T.mean(T.nnet.binary_crossentropy(self.output, Y))
        nll = -T.mean(Y * T.log(self.output)+ (1.- Y) * T.log(1. - self.output))
-       mse = T.mean((self.output - Y) ** 2)
+       #mse = T.mean((self.output - Y) ** 2)
+
+       #c_ = switch(theano.tensor.eq(c, 0), VALUE_WHEN_0, c) # c with 0s replaced by VALUE_WHEN_0
+
+       tmp = self.output - Y
+       tmp = theano.tensor.switch(theano.tensor.isnan(tmp),0,tmp)
+       mse = T.mean((tmp) ** 2)
+
 
        cost = 0
        if cost_function == 'mse':
@@ -60,6 +69,7 @@ class gru:
            cost = cxe
        else:
            cost = nll
+
        _optimizer = optimizer(
             cost,
             self.params,

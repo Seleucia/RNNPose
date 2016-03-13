@@ -62,7 +62,11 @@ def train_rnn(params):
              else:
                 pred = model.predictions(x)
 
-             loss=np.mean(np.abs(pred - y))
+             tmp=(pred -y)
+             tmp_y=tmp[~np.isnan(y)]
+             loss=np.mean(np.abs(tmp_y))
+             pred[np.isnan(y)] = 0
+             y[np.isnan(y)] = 0
              loss3d =u.get_loss(y,pred)
              batch_loss += loss
              batch_loss3d += loss3d

@@ -107,8 +107,8 @@ def load_test_pose(base_file,max_count,p_count):
            with open(gl, "rb") as f:
               data=f.read().strip().split(' ')
               y_d= [float(val) for val in data]
-              if(numpy.isnan(numpy.sum(y_d))):
-                  continue;
+              # if(numpy.isnan(numpy.sum(y_d))):
+              #     continue;
               Y_d.append(numpy.asarray(y_d))
            with open(fl, "rb") as f:
                data=f.read().strip().split(' ')
@@ -157,8 +157,8 @@ def load_train_pose(base_file,max_count,p_count):
             with open(gl, "rb") as f:
               data=f.read().strip().split(' ')
               y_d= [float(val) for val in data]
-              if(numpy.isnan(numpy.sum(y_d))):
-                  continue;
+              # if(numpy.isnan(numpy.sum(y_d))):
+              #     continue;
               Y_d.append(numpy.asarray(y_d))
 
             with open(fl, "rb") as f:
