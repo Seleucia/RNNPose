@@ -2,12 +2,12 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_pweight,init_bias
+from helper.utils import init_weight,init_pweight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
 
-class gru:
+class gru():
    def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
        self.n_in = n_in
        self.n_lstm = n_lstm
@@ -51,24 +51,7 @@ class gru:
 
        self.output = y_vals.dimshuffle(1,0,2)
 
-       cxe = T.mean(T.nnet.binary_crossentropy(self.output, Y))
-       nll = -T.mean(Y * T.log(self.output)+ (1.- Y) * T.log(1. - self.output))
-       #mse = T.mean((self.output - Y) ** 2)
-
-       #c_ = switch(theano.tensor.eq(c, 0), VALUE_WHEN_0, c) # c with 0s replaced by VALUE_WHEN_0
-
-       tmp = self.output - Y
-       tmp = theano.tensor.switch(theano.tensor.isnan(tmp),0,tmp)
-       mse = T.mean((tmp) ** 2)
-
-
-       cost = 0
-       if cost_function == 'mse':
-           cost = mse
-       elif cost_function == 'cxe':
-           cost = cxe
-       else:
-           cost = nll
+       cost=get_err_fn(self,cost_function,Y)
 
        _optimizer = optimizer(
             cost,
