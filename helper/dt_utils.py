@@ -169,7 +169,6 @@ def load_train_pose(base_file,max_count,p_count):
                X_d.append(numpy.asarray(x_d))
 
             if len(X_d)>p_count:
-               print fm
                X_D.append(X_d)
                Y_D.append(Y_d)
                X_d=[]
