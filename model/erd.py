@@ -14,8 +14,8 @@ class erd:
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
-       self.n_fc1=256
-       self.n_fc2=256
+       self.n_fc1=128
+       self.n_fc2=128
 
 
        self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1', 'glorot')

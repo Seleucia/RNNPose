@@ -15,9 +15,9 @@ class erd_pre:
        self.n_lstm = n_lstm
        self.n_out = n_out
        self.n_fc1=512
-       self.n_fc2=512
-       self.n_prefc1=256
-       self.n_prefc2=256
+       self.n_fc2=256
+       self.n_prefc1=128
+       self.n_prefc2=128
 
 
        self.W_prefc1 = init_weight((self.n_in, self.n_prefc1),'W_prefc1', 'glorot')
