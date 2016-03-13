@@ -18,28 +18,28 @@ class erd:
        self.n_fc2=256
 
 
-       self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1')
+       self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1', 'glorot')
        self.b_fc1 = init_bias(self.n_fc2, sample='zero')
 
-       self.W_fc2 = init_weight((self.n_fc2, self.n_out),'W_fc2')
+       self.W_fc2 = init_weight((self.n_fc2, self.n_out),'W_fc2', 'glorot')
        self.b_fc2 =init_bias(self.n_out, sample='zero')
 
-       self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi')
+       self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi', 'glorot')
        self.W_hi = init_weight((self.n_lstm, self.n_lstm),'W_hi', 'glorot')
        self.W_ci = init_weight((self.n_lstm, self.n_lstm),'W_ci', 'glorot')
        self.b_i = init_bias(self.n_lstm, sample='zero')
-       self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf')
+       self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf', 'glorot')
        self.W_hf = init_weight((self.n_lstm, self.n_lstm),'W_hf', 'glorot')
        self.W_cf = init_weight((self.n_lstm, self.n_lstm),'W_cf', 'glorot')
        self.b_f =init_bias(self.n_lstm, sample='one')
-       self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc')
+       self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc', 'glorot')
        self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'glorot')
        self.b_c = init_bias(self.n_lstm, sample='zero')
-       self.W_xo = init_weight((self.n_in, self.n_lstm),'W_xo')
+       self.W_xo = init_weight((self.n_in, self.n_lstm),'W_xo', 'glorot')
        self.W_ho = init_weight((self.n_lstm, self.n_lstm),'W_ho', 'glorot')
        self.W_co = init_weight((self.n_lstm, self.n_lstm),'W_co', 'glorot')
        self.b_o = init_bias(self.n_lstm, sample='zero')
-       self.W_hy = init_weight((self.n_lstm, self.n_fc1),'W_hy')
+       self.W_hy = init_weight((self.n_lstm, self.n_fc1),'W_hy', 'glorot')
        self.b_y = init_bias(self.n_fc1, sample='zero')
 
        self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,

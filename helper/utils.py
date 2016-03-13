@@ -20,6 +20,8 @@ def init_bias(n_out, sample='zero'):
         b = np.ones((n_out,), dtype=dtype)
     elif sample == 'uni':
         b=shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_out)))
+    elif sample == 'big_uni':
+        b=np.asarray(np.random.uniform(low=-5,high=5,size=n_out),dtype=dtype);
     else:
         raise ValueError("Unsupported initialization scheme: %s"
                          % sample)
