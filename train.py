@@ -9,8 +9,8 @@ import theano
 
 def train_rnn(params):
    (X_train,Y_train,X_test,Y_test)=du.load_pose(params)
-   params["len_train"]=len(X_train)
-   params["len_test"]=len(X_test)
+   params["len_train"]=X_train.shape[0]*X_train.shape[1]
+   params["len_test"]=X_test.shape[0]*X_test.shape[1]
    u.start_log(params)
    batch_size=params['batch_size']
    n_train_batches = len(X_train)
