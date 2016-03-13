@@ -104,15 +104,17 @@ def load_test_pose(base_file,max_count,p_count):
            gl=base_file+gt_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
            if not os.path.isfile(gl):
                continue
-           N_L.append(fl)
+           with open(gl, "rb") as f:
+              data=f.read().strip().split(' ')
+              y_d= [float(val) for val in data]
+              if(numpy.isnan(numpy.sum(y_d))):
+                  continue;
+              Y_d.append(numpy.asarray(y_d))
            with open(fl, "rb") as f:
                data=f.read().strip().split(' ')
                x_d = [float(val) for val in data]
                X_d.append(numpy.asarray(x_d))
-           with open(gl, "rb") as f:
-              data=f.read().strip().split(' ')
-              y_d= [float(val) for val in data]
-              Y_d.append(numpy.asarray(y_d))
+           N_L.append(fl)
            if len(X_d)>p_count and p_count>0:
                X_D.append(X_d)
                Y_D.append(Y_d)
@@ -152,14 +154,17 @@ def load_train_pose(base_file,max_count,p_count):
             if not os.path.isfile(fl):
                continue
 
+            with open(gl, "rb") as f:
+              data=f.read().strip().split(' ')
+              y_d= [float(val) for val in data]
+              if(numpy.isnan(numpy.sum(y_d))):
+                  continue;
+              Y_d.append(numpy.asarray(y_d))
+
             with open(fl, "rb") as f:
                data=f.read().strip().split(' ')
                x_d = [float(val) for val in data]
                X_d.append(numpy.asarray(x_d))
-            with open(gl, "rb") as f:
-              data=f.read().strip().split(' ')
-              y_d= [float(val) for val in data]
-              Y_d.append(numpy.asarray(y_d))
 
             if len(X_d)>p_count:
                X_D.append(X_d)
