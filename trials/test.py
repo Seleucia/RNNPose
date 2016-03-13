@@ -2,6 +2,12 @@ import theano
 import theano.tensor as T
 import numpy as np
 
+
+shape=(1024,128)
+fan_in, fan_out = shape[0],shape[1]
+s = np.sqrt(2. / (fan_in + fan_out))
+values=np.random.normal(loc=0.0, scale=s, size=shape)
+
 # define tensor variables
 X = T.matrix("X")
 W = T.matrix("W")

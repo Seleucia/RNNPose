@@ -74,6 +74,12 @@ class erd:
        self.output=fc2_out.dimshuffle(1,0,2)
 
        cost=get_err_fn(self,cost_function,Y)
+       lambda_2=0.0001
+       L2 = T.sum([(p**2).sum() for p in self.params])
+       L2 = lambda_2*L2
+
+       cost +=L2
+
 
        _optimizer = optimizer(
             cost,
