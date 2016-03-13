@@ -9,11 +9,13 @@ def load_pose(params,only_test=0,only_pose=1):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
+
+   X_train,Y_train=load_train_pose(data_dir,max_count,seq_length)
+
    X_test,Y_test,N_list=load_test_pose(data_dir,max_count,seq_length)
    if only_test==1:
       return (X_test,Y_test,N_list)
 
-   X_train,Y_train=load_train_pose(data_dir,max_count,seq_length)
    if params['shufle_data']==1:
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
 
@@ -137,7 +139,7 @@ def load_train_pose(base_file,max_count,p_count):
     #feature_seq13_frame2.txt
     #featureVec1024_calib_Huseyin_view360_frame2,featureVec1024_getUp_Huseyin_view360_frame380
     #sbl=["Huseyin"]#range(1,1,1):
-    sql=range(1,15,1);
+    sql=range(1,14,1);
     X_D=[]
     Y_D=[]
     p_index=0
@@ -146,7 +148,7 @@ def load_train_pose(base_file,max_count,p_count):
     for sq in sql:
         X_d=[]
         Y_d=[]
-        for fm in range(1,800,1):
+        for fm in range(1,1801,1):
             if len(X_D)>max_count:
                return (numpy.asarray(X_D),numpy.asarray(Y_D))
             fl=base_file+ft_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
@@ -167,6 +169,7 @@ def load_train_pose(base_file,max_count,p_count):
                X_d.append(numpy.asarray(x_d))
 
             if len(X_d)>p_count:
+               print fm
                X_D.append(X_d)
                Y_D.append(Y_d)
                X_d=[]
