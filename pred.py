@@ -6,14 +6,14 @@ import helper.utils as u
 import plot.plot_utils as pu
 params= config.get_params()
 params["model"]="erd"
-params['mfile']= "erd_model_test_0.p"
+params['mfile']= "erd_model_test_4_xx.p"
 #0, error 0.087360, 0.177598, 20.323595
 #error 0.078438, 0.161955, 16.453038
 #VAL--> epoch 21 | error 0.086701, 0.179906
 
 only_test=1
-params['seq_length']= 30
-params['batch_size']=60
+params['seq_length']= 20
+params['batch_size']=62
 batch_size=params['batch_size']
 
 u.prep_pred_file(params)
@@ -22,7 +22,7 @@ u.prep_pred_file(params)
 
 n_test = len(X_test)
 residual=n_test%batch_size
-#residual=
+#residual=0
 if residual>0:
    residual=batch_size-residual
    X_List=X_test.tolist()

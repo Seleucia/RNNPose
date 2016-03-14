@@ -3,13 +3,13 @@ import theano
 import theano.tensor as T
 from theano import shared
 from helper.utils import init_weight,init_pweight,init_bias,get_err_fn
-from helper.optimizer import RMSprop
+from helper.optimizer import RMSprop,Adam
 import helper.utils as u
 dtype = T.config.floatX
 
 
 class erd:
-   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
+   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, single_output=True, output_activation=theano.tensor.nnet.relu,cost_function='mse',optimizer = RMSprop):
 
        self.n_in = n_in
        self.n_lstm = n_lstm
@@ -25,7 +25,7 @@ class erd:
        self.W_fc2 = init_weight((self.n_fc2, self.n_fc3),'W_fc2', 'glorot')
        self.b_fc2 =init_bias(self.n_fc3, sample='zero')
 
-       self.W_fc3 = init_weight((self.n_fc3, self.n_out),'n_fc3', 'glorot')
+       self.W_fc3 = init_weight((self.n_fc3, self.n_out),'w_fc3', 'glorot')
        self.b_fc3 =init_bias(self.n_out, sample='zero')
 
        self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi', 'glorot')

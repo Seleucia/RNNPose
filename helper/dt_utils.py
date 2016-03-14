@@ -11,7 +11,7 @@ def load_pose(params,only_test=0,only_pose=1):
 
    X_test,Y_test,F_list,G_list=load_test_pose(data_dir,max_count,seq_length)
    norm=2#numpy.linalg.norm(X_test)
-   X_test=(X_test -numpy.min(X_test)) / (numpy.max(X_test) -numpy.min(X_test))
+   #X_test=(X_test -numpy.min(X_test)) / (numpy.max(X_test) -numpy.min(X_test))
    Y_test=Y_test/norm
    if only_test==1:
       return (X_test,Y_test,F_list,G_list)
@@ -23,7 +23,7 @@ def load_pose(params,only_test=0,only_pose=1):
 
    Y_train=Y_train/norm
    #norm=numpy.linalg.norm(X_test)
-   X_train=(X_train -numpy.min(X_train)) / (numpy.max(X_train) -numpy.min(X_train))
+   #X_train=(X_train -numpy.min(X_train)) / (numpy.max(X_train) -numpy.min(X_train))
 
    return (X_train,Y_train,X_test,Y_test)
 

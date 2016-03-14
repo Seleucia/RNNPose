@@ -5,25 +5,25 @@ from model.erd import erd
 from model.gru import gru
 from model.blstmnp import blstmnp
 from model.erd_pre import erd_pre
-from helper.optimizer import ClipRMSprop, RMSprop
+from helper.optimizer import ClipRMSprop, RMSprop,Adam
 import helper.utils as u
 import theano
 
 def get_model(params):
     if(params["model"]=="lstm"):
-        model = lstm(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
+        model = lstm(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
     elif(params["model"]=="lstmnp"):
-        model = lstmnp(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
+        model = lstmnp(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
     elif(params["model"]=="lstm2"):
-        model = lstm2(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
+        model = lstm2(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
     elif(params["model"]=="erd"):
-        model = erd(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
+        model = erd(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="erd_pre"):
-        model = erd_pre(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse')
+        model = erd_pre(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
     elif(params["model"]=="gru"):
-        model = gru(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=ClipRMSprop)
+        model = gru(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=ClipRMSprop)
     elif(params["model"]=="blstmnp"):
-        model = blstmnp(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['initial_learning_rate'],output_activation=theano.tensor.nnet.sigmoid, cost_function='mse',optimizer=RMSprop)
+        model = blstmnp(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
     else:
         model=None
     return model
