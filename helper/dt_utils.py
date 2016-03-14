@@ -2,31 +2,27 @@ import glob
 import struct
 import os
 import numpy
-from sklearn.preprocessing import normalize
-from sklearn.preprocessing import scale
 
 def load_pose(params,only_test=0,only_pose=1):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
 
-   X_train,Y_train=load_train_pose(data_dir,max_count,seq_length)
 
    X_test,Y_test,N_list=load_test_pose(data_dir,max_count,seq_length)
+   norm=2#numpy.linalg.norm(X_test)
+   X_test=(X_test -numpy.min(X_test)) / (numpy.max(X_test) -numpy.min(X_test))
+   Y_test=Y_test/norm
    if only_test==1:
       return (X_test,Y_test,N_list)
 
+   X_train,Y_train=load_train_pose(data_dir,max_count,seq_length)
    if params['shufle_data']==1:
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
 
-   #norm=numpy.linalg.norm(X_test)
-   norm=2#numpy.linalg.norm(X_test)
 
-   Y_test=Y_test/norm
    Y_train=Y_train/norm
-
    #norm=numpy.linalg.norm(X_test)
-   X_test=(X_test -numpy.min(X_test)) / (numpy.max(X_test) -numpy.min(X_test))
    X_train=(X_train -numpy.min(X_train)) / (numpy.max(X_train) -numpy.min(X_train))
 
    return (X_train,Y_train,X_test,Y_test)

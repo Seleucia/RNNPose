@@ -14,8 +14,8 @@ class erd:
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
-       self.n_fc1=128
-       self.n_fc2=128
+       self.n_fc1=256
+       self.n_fc2=256
 
 
        self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1', 'glorot')
@@ -74,13 +74,6 @@ class erd:
        self.output=fc2_out.dimshuffle(1,0,2)
 
        cost=get_err_fn(self,cost_function,Y)
-       lambda_2=0.0001
-       L2 = T.sum([(p**2).sum() for p in self.params])
-       L2 = lambda_2*L2
-
-       cost +=L2
-
-
        _optimizer = optimizer(
             cost,
             self.params,

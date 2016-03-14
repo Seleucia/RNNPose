@@ -5,22 +5,22 @@ import helper.dt_utils as du
 import helper.utils as u
 import plot.plot_utils as pu
 params= config.get_params()
-params["model"]="lstmnp"
-params['mfile']= "lstmnp_model_test_1.p"
+params["model"]="erd"
+params['mfile']= "erd_model_test_0.p"
 #0, error 0.087360, 0.177598, 20.323595
 #error 0.078438, 0.161955, 16.453038
 #VAL--> epoch 21 | error 0.086701, 0.179906
 
 only_test=1
-params["seq_length"]=-1
-batch_size=1
-params['batch_size']=batch_size
+params['seq_length']= 30
+params['batch_size']=60
+batch_size=params['batch_size']
 
 (X_test,Y_test,N_list)=du.load_pose(params,only_test)
-BB_list=du.load_test_bboxes(params,len(N_list))
 
 n_test = len(X_test)
 residual=n_test%batch_size
+residual=0
 if residual>0:
    residual=batch_size-residual
    X_List=X_test.tolist()
@@ -34,10 +34,12 @@ if residual>0:
    Y_test=np.asarray(Y_List)
    n_test = len(Y_test)
 
-n_test_batches =n_test/ batch_size
+# n_test_batches =n_test/ batch_size
+n_test_batches = len(X_test)
+n_test_batches /= batch_size
+
 print("Batch size: %i, test batch size: %i"%(batch_size,n_test_batches))
 print ("Model loading started")
-params["seq_length"]=21
 model= model_provider.get_model_pretrained(params)
 print("Prediction started")
 batch_loss = 0.
@@ -49,36 +51,32 @@ first_index=0
 for minibatch_index in range(n_test_batches):
    x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
    y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
-   x=np.asarray(x[0])
-   y=np.asarray(y[0])
-   x=np.expand_dims(x,axis=0)
-   y=np.expand_dims(y,axis=0)
+   # x=np.asarray(x[0])
+   # y=np.asarray(y[0])
+   # x=np.expand_dims(x,axis=0)
+   # y=np.expand_dims(y,axis=0)
 
    last_index=first_index+sum([len(i) for i in y])
    n_list=N_list[first_index:last_index]
-   bb_list=BB_list[first_index:last_index]
    first_index=last_index
    pred = model.predictions(x)
-   print "Prediction completed."
+   # print("Prediction done....")
    if residual>0:
       if(minibatch_index==n_test_batches-1):
          pred = pred[0:(len(pred)-residual)]
          y=y[0:(len(y)-residual)]
-         bb_list=bb_list[0:(len(bb_list)-residual)]
          n_list=n_list[0:(len(n_list)-residual)]
 
 #   du.write_predictions(params,pred,n_list)
-   loss=np.mean(np.abs(pred - y))
-   (loss3d,bb_loss,l_list) =u.get_loss_bb(y,pred,bb_list)
+   loss=np.nanmean(np.abs(pred -y))
+   (loss3d,l_list) =u.get_loss_bb(y,pred)
    loss_list=loss_list+l_list
    batch_loss += loss
    batch_loss3d += loss3d
-   batch_bb_loss+=bb_loss
 batch_loss/=n_test_batches
 batch_loss3d/=n_test_batches
-batch_bb_loss/=n_test_batches
-s ='error %f, %f, %f '%(batch_loss,batch_loss3d,batch_bb_loss)
+s ='error %f, %f, %f'%(batch_loss,batch_loss3d,n_test_batches)
 print (s)
 pu.plot_histograms(loss_list)
 pu.plot_error_frame(loss_list)
-pu.plot_cumsum(loss_list)
+#pu.plot_cumsum(loss_list)

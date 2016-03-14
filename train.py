@@ -74,7 +74,7 @@ def train_rnn(params):
              u.write_params(model.params,params,ext)
 
           val_counter+=1#0.08
-          s ='VAL--> epoch %i | error %f, %f '%(val_counter,batch_loss,batch_loss3d)
+          s ='VAL--> epoch %i | error %f, %f %f'%(val_counter,batch_loss,batch_loss3d,n_test_batches)
           u.log_write(s,params)
 
 

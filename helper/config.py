@@ -25,7 +25,7 @@ def get_params():
    params['wd']=wd
    params['log_file']=wd+"/logs/"+params["model"]+"_"+params["rn_id"]+"_"+str(params['run_mode'])+"_"+utils.get_time()+".txt"
    params["model_file"]=wd+"/cp/"
-   params["data_dir"]="/home/coskun/PycharmProjects/data/pose/30k/"
+   params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/30k/"
 
 
 
