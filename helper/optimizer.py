@@ -71,7 +71,7 @@ class RMSprop:
 #         return updates
 
 class Adam():
-    def __init__(self,cost,params,lr=0.0001, b1=0.1, b2=0.01, e=1e-8):
+    def __init__(self,cost,params,lr=0.0001, b1=0.1, b2=0.001, e=1e-8):
         self.cost = cost
         self.params = params
         self.i = theano.shared(np.float32(0.))
