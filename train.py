@@ -70,7 +70,7 @@ def train_rnn(params):
           batch_loss3d/=n_test_batches
           if(best_loss<batch_loss):
              best_loss=batch_loss
-             ext=str(val_counter%5)+"_best.p"
+             ext=str(batch_loss)+"_best.p"
              u.write_params(model.params,params,ext)
           else:
               ext=str(val_counter%2)+".p"
