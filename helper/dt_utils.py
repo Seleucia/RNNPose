@@ -9,12 +9,12 @@ def load_pose(params,only_test=0,only_pose=1):
    seq_length=params["seq_length"]
 
 
-   X_test,Y_test,N_list=load_test_pose(data_dir,max_count,seq_length)
+   X_test,Y_test,F_list,G_list=load_test_pose(data_dir,max_count,seq_length)
    norm=2#numpy.linalg.norm(X_test)
    X_test=(X_test -numpy.min(X_test)) / (numpy.max(X_test) -numpy.min(X_test))
    Y_test=Y_test/norm
    if only_test==1:
-      return (X_test,Y_test,N_list)
+      return (X_test,Y_test,F_list,G_list)
 
    X_train,Y_train=load_train_pose(data_dir,max_count,seq_length)
    if params['shufle_data']==1:
@@ -91,13 +91,14 @@ def load_test_pose(base_file,max_count,p_count):
     p_index=0
     X_d=[]
     Y_d=[]
-    N_L=[]
+    F_L=[]
+    G_L=[]
     for sq in sql:
         X_d=[]
         Y_d=[]
         for fm in range(0,1801,1):
            if len(X_D)>max_count:
-               return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
+               return (numpy.asarray(X_D),numpy.asarray(Y_D),F_L,G_L)
            fl=base_file+ft_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
            gl=base_file+gt_prefix+"seq"+str(sq)+"_frame"+str(fm)+".txt"
            if not os.path.isfile(gl):
@@ -112,7 +113,8 @@ def load_test_pose(base_file,max_count,p_count):
                data=f.read().strip().split(' ')
                x_d = [float(val) for val in data]
                X_d.append(numpy.asarray(x_d))
-           N_L.append(fl)
+           F_L.append(fl)
+           G_L.append(gl)
            if len(X_d)>p_count and p_count>0:
                X_D.append(X_d)
                Y_D.append(Y_d)
@@ -126,7 +128,7 @@ def load_test_pose(base_file,max_count,p_count):
           p_index=p_index+1
 
 
-    return (numpy.asarray(X_D),numpy.asarray(Y_D),N_L)
+    return (numpy.asarray(X_D),numpy.asarray(Y_D),F_L,G_L)
 
 def load_train_pose(base_file,max_count,p_count):
     base_file=base_file+"train/"

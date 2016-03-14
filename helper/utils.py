@@ -174,6 +174,35 @@ def get_loss(gt,est):
     loss/=(seq_length*batch_size)
     return (loss)
 
+def prep_pred_file(params):
+    f_dir=params["wd"]+"/pred/";
+    if not os.path.exists(f_dir):
+            os.makedirs(f_dir)
+    f_dir=params["wd"]+"/pred/"+params["model"];
+    if not os.path.exists(f_dir):
+            os.makedirs(f_dir)
+    map( os.unlink, (os.path.join( f_dir,f) for f in os.listdir(f_dir)) )
+
+
+def write_pred(est,bindex,G_list,params):
+    batch_size=est.shape[0]
+    seq_length=est.shape[1]
+    s_index=batch_size*bindex*seq_length
+    f_dir=params["wd"]+"/pred/"+params["model"]+"/"
+    for b in range(batch_size):
+        for s in range(seq_length):
+            diff_vec=est[b][s]*2
+            vec_str = ' '.join(['%.5f' % num for num in diff_vec])
+            p_file=f_dir+os.path.basename(G_list[s_index])
+            with open(p_file, "a") as p:
+                p.write(vec_str)
+            s_index+=1
+            print s_index
+
+
+
+
+
 def get_loss_bb(gt,est):
     batch_size=gt.shape[0]
     seq_length=gt.shape[1]

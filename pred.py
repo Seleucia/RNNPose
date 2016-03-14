@@ -16,11 +16,13 @@ params['seq_length']= 30
 params['batch_size']=60
 batch_size=params['batch_size']
 
-(X_test,Y_test,N_list)=du.load_pose(params,only_test)
+u.prep_pred_file(params)
+
+(X_test,Y_test,N_list,G_list)=du.load_pose(params,only_test)
 
 n_test = len(X_test)
 residual=n_test%batch_size
-residual=0
+#residual=
 if residual>0:
    residual=batch_size-residual
    X_List=X_test.tolist()
@@ -38,7 +40,7 @@ if residual>0:
 n_test_batches = len(X_test)
 n_test_batches /= batch_size
 
-print("Batch size: %i, test batch size: %i"%(batch_size,n_test_batches))
+print("Test sample size: %i, Batch size: %i, test batch size: %i"%(X_test.shape[0]*X_test.shape[1],batch_size,n_test_batches))
 print ("Model loading started")
 model= model_provider.get_model_pretrained(params)
 print("Prediction started")
@@ -68,6 +70,7 @@ for minibatch_index in range(n_test_batches):
          n_list=n_list[0:(len(n_list)-residual)]
 
 #   du.write_predictions(params,pred,n_list)
+   u.write_pred(pred,minibatch_index,G_list,params)
    loss=np.nanmean(np.abs(pred -y))
    (loss3d,l_list) =u.get_loss_bb(y,pred)
    loss_list=loss_list+l_list

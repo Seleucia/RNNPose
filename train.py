@@ -31,6 +31,7 @@ def train_rnn(params):
    train_errors = np.ndarray(nb_epochs)
    u.log_write("Training started",params)
    val_counter=0
+   best_loss=0
    for epoch_counter in range(nb_epochs):
       batch_loss = 0.
       for minibatch_index in range(n_train_batches):
@@ -48,7 +49,6 @@ def train_rnn(params):
       batch_loss/=n_train_batches
       s='TRAIN--> epoch %i | error %f'%(epoch_counter, batch_loss)
       u.log_write(s,params)
-      best_loss=0
       if(epoch_counter%10==0):
           print("Model testing")
           batch_loss = 0.
@@ -70,8 +70,11 @@ def train_rnn(params):
           batch_loss3d/=n_test_batches
           if(best_loss<batch_loss):
              best_loss=batch_loss
-             ext=str(val_counter%5)+".p"
+             ext=str(val_counter%5)+"_best.p"
              u.write_params(model.params,params,ext)
+          else:
+              ext=str(val_counter%2)+".p"
+              u.write_params(model.params,params,ext)
 
           val_counter+=1#0.08
           s ='VAL--> epoch %i | error %f, %f %f'%(val_counter,batch_loss,batch_loss3d,n_test_batches)

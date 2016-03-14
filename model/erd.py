@@ -25,8 +25,8 @@ class erd:
        self.W_fc2 = init_weight((self.n_fc2, self.n_fc3),'W_fc2', 'glorot')
        self.b_fc2 =init_bias(self.n_fc3, sample='zero')
 
-       self.W_fc2 = init_weight((self.n_fc3, self.n_out),'n_fc3', 'glorot')
-       self.b_fc2 =init_bias(self.n_out, sample='zero')
+       self.W_fc3 = init_weight((self.n_fc3, self.n_out),'n_fc3', 'glorot')
+       self.b_fc3 =init_bias(self.n_out, sample='zero')
 
        self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi', 'glorot')
        self.W_hi = init_weight((self.n_lstm, self.n_lstm),'W_hi', 'glorot')
