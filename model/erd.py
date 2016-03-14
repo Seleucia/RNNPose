@@ -16,12 +16,16 @@ class erd:
        self.n_out = n_out
        self.n_fc1=256
        self.n_fc2=256
+       self.n_fc3=256
 
 
        self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1', 'glorot')
        self.b_fc1 = init_bias(self.n_fc2, sample='zero')
 
-       self.W_fc2 = init_weight((self.n_fc2, self.n_out),'W_fc2', 'glorot')
+       self.W_fc2 = init_weight((self.n_fc2, self.n_fc3),'W_fc2', 'glorot')
+       self.b_fc2 =init_bias(self.n_fc3, sample='zero')
+
+       self.W_fc2 = init_weight((self.n_fc3, self.n_out),'n_fc3', 'glorot')
        self.b_fc2 =init_bias(self.n_out, sample='zero')
 
        self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi', 'glorot')
@@ -46,7 +50,7 @@ class erd:
                       self.W_xf, self.W_hf, self.W_cf, self.b_f,
                       self.W_xc, self.W_hc, self.b_c,self.W_xo,
                       self.W_ho, self.W_co, self.b_o,
-                      self.W_hy, self.b_y,self.W_fc1, self.b_fc1,self.W_fc2, self.b_fc2]
+                      self.W_hy, self.b_y,self.W_fc1, self.b_fc1,self.W_fc2, self.b_fc2,self.W_fc3, self.b_fc3]
 
 
        def step_lstm(x_t, h_tm1, c_tm1):
@@ -70,8 +74,9 @@ class erd:
        #Hidden layer
        fc1_out = T.tanh(T.dot(y_vals, self.W_fc1)  + self.b_fc1)
        fc2_out = T.tanh(T.dot(fc1_out, self.W_fc2)  + self.b_fc2)
+       fc3_out = T.tanh(T.dot(fc2_out, self.W_fc3)  + self.b_fc3)
 
-       self.output=fc2_out.dimshuffle(1,0,2)
+       self.output=fc3_out.dimshuffle(1,0,2)
 
        cost=get_err_fn(self,cost_function,Y)
        _optimizer = optimizer(
