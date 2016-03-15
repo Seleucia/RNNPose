@@ -186,15 +186,12 @@ def prep_pred_file(params):
 def write_pred(est,bindex,G_list,params):
     batch_size=est.shape[0]
     seq_length=est.shape[1]
-    s_index=batch_size*bindex*seq_length
+    s_index=params["batch_size"]*bindex*seq_length
     f_dir=params["wd"]+"/pred/"+params["model"]+"/"
-    print "--------------------------"
-    print s_index
-    print batch_size
     for b in range(batch_size):
         for s in range(seq_length):
             diff_vec=est[b][s]*2
-            vec_str = ' '.join(['%.5f' % num for num in diff_vec])
+            vec_str = ' '.join(['%.6f' % num for num in diff_vec])
             p_file=f_dir+os.path.basename(G_list[s_index])
             with open(p_file, "a") as p:
                 p.write(vec_str)
