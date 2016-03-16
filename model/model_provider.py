@@ -21,7 +21,7 @@ def get_model(params):
         model = erd(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="erd_pre"):
         model = erd_pre(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
-    elif(params["model"]=="lstm2erd"):
+    elif(params["model"]=="gru"):
         model = gru(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="lstm2erd"):
         model = lstm2erd(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)

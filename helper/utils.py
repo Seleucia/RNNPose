@@ -162,18 +162,6 @@ def get_err_fn(self,cost_function,Y):
            cost = nll
        return cost
 
-def get_loss(gt,est):
-    batch_size=gt.shape[0]
-    seq_length=gt.shape[1]
-    loss=0
-    for b in range(batch_size):
-        for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3)) #13*3
-            sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
-            loss +=np.nanmean(sq_m)
-    loss/=(seq_length*batch_size)
-    return (loss)
-
 def prep_pred_file(params):
     f_dir=params["wd"]+"/pred/";
     if not os.path.exists(f_dir):
@@ -197,6 +185,17 @@ def write_pred(est,bindex,G_list,params):
                 p.write(vec_str)
             s_index+=1
 
+def get_loss(gt,est):
+    batch_size=gt.shape[0]
+    seq_length=gt.shape[1]
+    loss=0
+    for b in range(batch_size):
+        for s in range(seq_length):
+            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3))*2 #13*3
+            sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
+            loss +=np.nanmean(sq_m)
+    loss/=(seq_length*batch_size)
+    return (loss)
 
 def get_loss_bb(gt,est):
     batch_size=gt.shape[0]
