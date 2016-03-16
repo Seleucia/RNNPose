@@ -7,26 +7,85 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
-
-   X_test,Y_test,F_list,G_list=load_test_poseV2(data_dir,max_count,seq_length,sindex)
+   istest=True
+   get_flist=False
+   X_test,Y_test,F_list,G_list=load_full_pose(data_dir,max_count,istest,get_flist,seq_length,sindex)
    norm=2#numpy.linalg.norm(X_test)
    #X_test=(X_test -numpy.min(X_test)) / (numpy.max(X_test) -numpy.min(X_test))
    Y_test=Y_test/norm
    if only_test==1:
       return (X_test,Y_test,F_list,G_list)
 
-   X_train,Y_train=load_train_poseV2(data_dir,max_count,seq_length,sindex=sindex)
+   istest=False
+   get_flist=False
+   X_train,Y_train,F_list,G_list=load_full_pose(data_dir,max_count,istest,get_flist,seq_length,sindex)
    if params['shufle_data']==1:
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
 
-
    Y_train=Y_train/norm
-   #norm=numpy.linalg.norm(X_test)
-   #X_train=(X_train -numpy.min(X_train)) / (numpy.max(X_train) -numpy.min(X_train))
 
    return (X_train,Y_train,X_test,Y_test)
 
 
+
+def load_full_pose(base_file,max_count,istest,get_flist,p_count,sindex):
+    if(istest):
+        base_file=base_file+"test/test.txt"
+    else:
+        base_file=base_file+"train/train.txt"
+    X_D=[]
+    Y_D=[]
+    p_index=0
+    X_d=[]
+    Y_d=[]
+    F_L=[]
+    G_L=[]
+    old_f_sq_nm=1
+    with open(base_file) as f:
+        lines = f.readlines()
+        fl_len=len(lines)/4
+        for nm in range(sindex,fl_len):
+            fname=lines[nm*4+0]
+            lname=lines[nm*4+1]
+            frame=lines[nm*4+2]
+            label=lines[nm*4+3]
+            f_sq_nm=int(fname.split("_")[1].replace("seq"))
+
+            # l_sq_nm=int(lname.split("_")[1].replace("seq"))
+            # f_nm=int(lname.split("_")[2].replace("frame"))
+
+            if(f_sq_nm != old_f_sq_nm):
+                if p_count==-1 and len(X_d)>0:
+                    X_D.append(X_d)
+                    Y_D.append(Y_d)
+                    p_index=p_index+1
+                old_f_sq_nm=f_sq_nm
+                X_d=[]
+                Y_d=[]
+
+            if(get_flist):
+                F_L.append(fname)
+                G_L.append(label)
+
+            data=label.strip().split(' ')
+            y_d= [float(val) for val in data]
+            Y_d.append(numpy.asarray(y_d))
+
+            data=frame.strip().split(' ')
+            x_d = [float(val) for val in data]
+            X_d.append(numpy.asarray(x_d))
+
+            if len(X_d)==p_count and p_count>0:
+               X_D.append(X_d)
+               Y_D.append(Y_d)
+               X_d=[]
+               Y_d=[]
+               p_index=p_index+1
+
+            if len(X_D)==max_count:
+               return (numpy.asarray(X_D),numpy.asarray(Y_D),F_L,G_L)
+
+    return (numpy.asarray(X_D),numpy.asarray(Y_D),F_L,G_L)
 
 def load_test_poseV2(base_file,max_count,p_count,sindex):
     base_file=base_file+"test/"
