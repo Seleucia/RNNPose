@@ -1,5 +1,6 @@
 from model.lstm import  lstm
 from model.lstmnp import  lstmnp
+from model.lstm2erd import lstm2erd
 from model.lstm2 import lstm2
 from model.erd import erd
 from model.gru import gru
@@ -11,19 +12,21 @@ import theano
 
 def get_model(params):
     if(params["model"]=="lstm"):
-        model = lstm(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
+        model = lstm(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="lstmnp"):
-        model = lstmnp(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
+        model = lstmnp(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="lstm2"):
-        model = lstm2(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
+        model = lstm2(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="erd"):
-        model = erd(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
+        model = erd(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="erd_pre"):
-        model = erd_pre(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
-    elif(params["model"]=="gru"):
-        model = gru(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=ClipRMSprop)
+        model = erd_pre(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
+    elif(params["model"]=="lstm2erd"):
+        model = gru(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
+    elif(params["model"]=="lstm2erd"):
+        model = lstm2erd(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="blstmnp"):
-        model = blstmnp(1024, params['n_hidden'], 39,batch_size=params['batch_size'],lr=params['lr'], optimizer=RMSprop)
+        model = blstmnp(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     else:
         model=None
     return model

@@ -60,6 +60,7 @@ class erd:
            o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + T.dot(c_t, self.W_co)  + self.b_o)
            h_t = o_t * T.tanh(c_t)
            y_t = T.tanh(T.dot(h_t, self.W_hy) + self.b_y)
+
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector

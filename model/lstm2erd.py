@@ -7,11 +7,25 @@ from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
 
-class lstm2:
+class lstm2erd:
    def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
+
+       self.n_fc1=256
+       self.n_fc2=256
+       self.n_fc3=256
+
+       self.W_fc1 = init_weight((self.n_fc1, self.n_fc2),'W_fc1', 'glorot')
+       self.b_fc1 = init_bias(self.n_fc2, sample='zero')
+
+       self.W_fc2 = init_weight((self.n_fc2, self.n_fc3),'W_fc2', 'glorot')
+       self.b_fc2 =init_bias(self.n_fc3, sample='zero')
+
+       self.W_fc3 = init_weight((self.n_fc3, self.n_out),'w_fc3', 'glorot')
+       self.b_fc3 =init_bias(self.n_out, sample='zero')
+
        #1th layer
        self.W_xi_1 = init_weight((self.n_in, self.n_lstm), 'W_xi_1', 'glorot')
        self.W_hi_1 = init_weight((self.n_lstm, self.n_lstm), 'W_hi_1', 'glorot')
@@ -59,7 +73,8 @@ class lstm2:
                       self.W_xi_2, self.W_hi_2, self.W_ci_2, self.b_i_2,
                       self.W_xf_2, self.W_hf_2, self.W_cf_2, self.b_f_2,
                       self.W_xc_2, self.W_hc_2, self.b_c_2, self.W_xo_2,  self.W_ho_2,
-                      self.W_co_2, self.b_o_2,  self.W_hy_2, self.b_y_2
+                      self.W_co_2, self.b_o_2,  self.W_hy_2, self.b_y_2,
+                      self.W_fc1, self.b_fc1,self.W_fc2, self.b_fc2,self.W_fc3, self.b_fc3
                       ]
 
 
@@ -90,7 +105,13 @@ class lstm2:
        [h_vals_1, c_vals_1,h_vals_2, c_vals_2, y_vals], _ = theano.scan(fn=step_lstm,
                                          sequences=X.dimshuffle(1,0,2),
                                          outputs_info=[h0_1, c0_1,h0_2, c0_2, None])
-       self.output = y_vals.dimshuffle(1,0,2)
+       #Hidden layers
+       fc1_out = T.tanh(T.dot(y_vals, self.W_fc1)  + self.b_fc1)
+       fc2_out = T.tanh(T.dot(fc1_out, self.W_fc2)  + self.b_fc2)
+       fc3_out = T.tanh(T.dot(fc2_out, self.W_fc3)  + self.b_fc3)
+
+       self.output=fc3_out.dimshuffle(1,0,2)
+
        cost=get_err_fn(self,cost_function,Y)
        _optimizer = optimizer(
             cost,

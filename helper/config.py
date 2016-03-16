@@ -41,6 +41,7 @@ def get_params():
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600
    params['n_hidden']= 512
+   params['n_output']= 39
 
    if(platform.node()=="coskunh"):
        params["caffe"]="/home/coskun/sftpkg/caffe/python"

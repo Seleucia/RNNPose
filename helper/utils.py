@@ -205,7 +205,7 @@ def get_loss_bb(gt,est):
     loss_list=[]
     for b in range(batch_size):
         for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3)) #54*3
+            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3))*2 #54*3
             b_l=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
             loss_list.append(b_l)
             loss +=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
