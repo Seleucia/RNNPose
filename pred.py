@@ -5,15 +5,17 @@ import helper.dt_utils as du
 import helper.utils as u
 import plot.plot_utils as pu
 params= config.get_params()
-params["model"]="erd"
-params['mfile']= "erd_model_test_0.p"
+params["model"]="blstmnp"
+params['mfile']= "blstmnp_tanhvb_0.131655512324_best.p"
+params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/blanket_test/"
+# params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/180k/"
 #0, error 0.087360, 0.177598, 20.323595
 #error 0.078438, 0.161955, 16.453038
 #VAL--> epoch 21 | error 0.086701, 0.179906
 
 only_test=1
-params['seq_length']= 19
-params['batch_size']=60
+params['seq_length']= 198
+params['batch_size']=1
 batch_size=params['batch_size']
 
 u.prep_pred_file(params)
@@ -48,9 +50,10 @@ print("Prediction started")
 batch_loss = 0.
 batch_loss3d = 0.
 batch_bb_loss = 0.
-loss_list=[0]
+loss_list=[]
 last_index=0
 first_index=0
+sq_loss_lst=[]
 for minibatch_index in range(n_test_batches):
    x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
    y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
@@ -62,7 +65,11 @@ for minibatch_index in range(n_test_batches):
    last_index=first_index+sum([len(i) for i in y])
    n_list=N_list[first_index:last_index]
    first_index=last_index
-   pred = model.predictions(x)
+   if(params["model"]=="blstmnp"):
+      x_b=np.asarray(map(np.flipud,x))
+      pred = model.predictions(x,x_b)
+   else:
+      pred = model.predictions(x)
    # print("Prediction done....")
    if residual>0:
       if(minibatch_index==n_test_batches-1):
@@ -71,15 +78,20 @@ for minibatch_index in range(n_test_batches):
          n_list=n_list[0:(len(n_list)-residual)]
 
 #   du.write_predictions(params,pred,n_list)
-   u.write_pred(pred,minibatch_index,G_list,params)
-   loss=np.nanmean(np.abs(pred -y))
-   (loss3d,l_list) =u.get_loss_bb(y,pred)
+   #u.write_pred(pred,minibatch_index,G_list,params)
+   loss=np.nanmean(np.abs(pred -y))*2
+   (loss3d,l_list,s_list) =u.get_loss_bb(y,pred)
+   #print(s_list)
+   sq_loss_lst.append(s_list)
    loss_list=loss_list+l_list
    batch_loss += loss
    batch_loss3d += loss3d
+sq_loss_lst=np.nanmean(sq_loss_lst,axis=0)
 batch_loss/=n_test_batches
 batch_loss3d/=n_test_batches
-s ='error %f, %f, %f'%(batch_loss,batch_loss3d,n_test_batches)
+print "============================================================================"
+print sq_loss_lst
+s ='error %f, %f, %f,%f'%(batch_loss,batch_loss3d,n_test_batches,len(loss_list))
 print (s)
 pu.plot_histograms(loss_list)
 pu.plot_error_frame(loss_list)

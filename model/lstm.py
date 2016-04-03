@@ -2,33 +2,33 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_pweight,init_bias,get_err_fn
+from helper.utils import init_weight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
 
 class lstm:
-   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
+   def __init__(self,rng, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='mse',optimizer = RMSprop):
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
-       self.W_xi = init_weight((self.n_in, self.n_lstm),'W_xi', 'glorot')
-       self.W_hi = init_weight((self.n_lstm, self.n_lstm),'W_hi', 'ortho')
-       self.W_ci = init_pweight((self.n_lstm, self.n_lstm),'W_ci', 'glorot')
-       self.b_i  = init_bias(self.n_lstm, sample='zero')
-       self.W_xf = init_weight((self.n_in, self.n_lstm),'W_xf', 'glorot')
-       self.W_hf = init_weight((self.n_lstm, self.n_lstm),'W_hf', 'ortho')
-       self.W_cf = init_pweight((self.n_lstm, self.n_lstm),'W_cf', 'glorot')
-       self.b_f = init_bias(self.n_lstm, sample='one')
-       self.W_xc = init_weight((self.n_in, self.n_lstm),'W_xc', 'glorot')
-       self.W_hc = init_weight((self.n_lstm, self.n_lstm),'W_hc', 'ortho')
-       self.b_c = init_bias(self.n_lstm, sample='zero')
-       self.W_xo = init_weight((self.n_in, self.n_lstm),'W_xo', 'glorot')
-       self.W_ho = init_weight((self.n_lstm, self.n_lstm),'W_ho', 'ortho')
-       self.W_co = init_pweight((self.n_lstm, self.n_lstm),'W_co', 'glorot')
-       self.b_o = init_bias(self.n_lstm, sample='zero')
-       self.W_hy = init_weight((self.n_lstm, self.n_out),'W_hy', 'glorot')
-       self.b_y = init_bias(self.n_out, sample='zero')
+       self.W_xi = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xi',sample= 'glorot')
+       self.W_hi = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_hi', sample='glorot')
+       self.W_ci = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_ci',sample= 'glorot')
+       self.b_i  = init_bias(self.n_lstm,rng=rng, sample='zero')
+       self.W_xf = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xf',sample= 'glorot')
+       self.W_hf = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_hf',sample= 'glorot')
+       self.W_cf = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_cf', sample='glorot')
+       self.b_f = init_bias(self.n_lstm, rng=rng,sample='one')
+       self.W_xc = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xc', sample='glorot')
+       self.W_hc = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_hc', sample='ortho')
+       self.b_c = init_bias(self.n_lstm, rng=rng,sample='zero')
+       self.W_xo = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xo',sample= 'glorot')
+       self.W_ho = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_ho', sample='glorot')
+       self.W_co = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_co',sample= 'glorot')
+       self.b_o = init_bias(self.n_lstm,rng=rng, sample='zero')
+       self.W_hy = init_weight((self.n_lstm, self.n_out),rng=rng,name='W_hy',sample= 'glorot')
+       self.b_y = init_bias(self.n_out,rng=rng, sample='zero')
 
        self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,
                       self.W_xf, self.W_hf, self.W_cf, self.b_f,
@@ -42,7 +42,7 @@ class lstm:
            c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
            o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + c_t*self.W_co  + self.b_o)
            h_t = o_t * T.tanh(c_t)
-           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy) + self.b_y)
+           y_t = T.tanh(T.dot(h_t, self.W_hy) + self.b_y)
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector

@@ -5,19 +5,18 @@ import helper.dt_utils as du
 import helper.utils as u
 import plot.plot_utils as pu
 params= config.get_params()
-params["model"]="erd"
-params['mfile']= "erd_model_test_0.p"
+params["model"]="blstmnp"
+params['mfile']= "blstmnp_tanhvb_0.131781702586_best.p"
+params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/blanket_test/"
 #0, error 0.087360, 0.177598, 20.323595
 #error 0.078438, 0.161955, 16.453038
 #VAL--> epoch 21 | error 0.086701, 0.179906
 
 only_test=1
-params['seq_length']= 19
-params['batch_size']=30
+params['seq_length']= 20
+params['batch_size']=60
 batch_size=params['batch_size']
 seq_length=params["seq_length"]
-
-
 
 u.prep_pred_file(params)
 
@@ -60,6 +59,7 @@ for sp in range(seq_length):
    loss_list=[0]
    last_index=0
    first_index=0
+   sq_loss_lst=[]
    for minibatch_index in range(n_test_batches):
       x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
       y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
@@ -71,7 +71,11 @@ for sp in range(seq_length):
       last_index=first_index+sum([len(i) for i in y])
       n_list=N_list[first_index:last_index]
       first_index=last_index
-      pred = model.predictions(x)
+      if(params["model"]=="blstmnp"):
+         x_b=np.asarray(map(np.flipud,x))
+         pred = model.predictions(x,x_b)
+      else:
+         pred = model.predictions(x)
       # print("Prediction done....")
       if residual>0:
          if(minibatch_index==n_test_batches-1):
@@ -82,28 +86,32 @@ for sp in range(seq_length):
    #   du.write_predictions(params,pred,n_list)
       #u.write_pred(pred,minibatch_index,G_list,params)
       loss=np.nanmean(np.abs(pred -y))*2
-      (loss3d,l_list) =u.get_loss_bb(y,pred)
+      (loss3d,l_list,s_list) =u.get_loss_bb(y,pred)
+      sq_loss_lst.append(s_list)
       loss_list=loss_list+l_list
       batch_loss += loss
       batch_loss3d += loss3d
 
+   sq_loss_lst=np.nanmean(sq_loss_lst,axis=0)
    batch_loss/=n_test_batches
    batch_loss3d/=n_test_batches
    full_lost.append(loss_list)
-   s ='error %f, %f, %f'%(batch_loss,batch_loss3d,n_test_batches)
+   print "============================================================================"
+   print sq_loss_lst
+   s ='error %f, %f, %f,%f'%(batch_loss,batch_loss3d,n_test_batches,len(loss_list))
    print (s)
 
-all=1
+all=0
 final_loss=[0]*(len(full_lost[0])+seq_length)
 for sp in range(seq_length):
    ls=full_lost[sp]
-   print len(ls)
+   #print len(ls)
    if(all==0):
       if(sp==0):
          final_loss[0:seq_length]=ls[0:seq_length]
       for index in range(seq_length,len(ls),seq_length):
          f_index=sp+index
-         final_loss[f_index-3]=ls[index-3]
+         final_loss[f_index-7]=ls[index-7]
    else:
       print(sp)
       for index in range(0,len(ls)):
@@ -114,10 +122,11 @@ for sp in range(seq_length):
 
 final_loss=final_loss[seq_length:len(final_loss)-seq_length]
 print len(final_loss)
-final_loss=[l/seq_length for l in final_loss if l != -1]
+if(all==1):
+   final_loss=[l/seq_length for l in final_loss]
 print len(final_loss)
-final_mean=np.mean(final_loss)
 
+final_mean=np.mean(final_loss)
 s ='Final mean error %f'%(final_mean)
 print(s)
 pu.plot_histograms(final_loss)

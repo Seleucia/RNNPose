@@ -2,13 +2,13 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_pweight,init_bias
+from helper.utils import init_weight,init_bias
 from helper.optimizer import RMSprop
 
 dtype = T.config.floatX
 
 class lstmnp:
-   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
+   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='mse',optimizer = RMSprop):
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
@@ -39,7 +39,7 @@ class lstmnp:
            c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
            o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + self.b_o)
            h_t = o_t * T.tanh(c_t)
-           y_t = T.nnet.sigmoid(T.dot(h_t, self.W_hy) + self.b_y)
+           y_t = T.tanh(T.dot(h_t, self.W_hy) + self.b_y)
            return [h_t, c_t, y_t]
 
        X = T.tensor3() # batch of sequence of vector

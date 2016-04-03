@@ -2,46 +2,46 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_pweight,init_bias,get_err_fn
+from helper.utils import init_weight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
 from theano import function as Tfunc
 
 dtype = T.config.floatX
 
 class blstmnp:
-   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='nll',optimizer = RMSprop):
+   def __init__(self, n_in, n_lstm, n_out, lr=0.05, batch_size=64, output_activation=theano.tensor.nnet.relu,cost_function='mse',optimizer = RMSprop):
        self.n_in = n_in
        self.n_lstm = n_lstm
        self.n_out = n_out
        #Forward weights
-       self.W_xi_f = init_weight((self.n_in, self.n_lstm), 'W_xi', 'glorot')
-       self.W_hi_f = init_weight((self.n_lstm, self.n_lstm), 'W_hi', 'ortho')
+       self.W_xi_f = init_weight((self.n_in, self.n_lstm), 'W_xif', 'glorot')
+       self.W_hi_f = init_weight((self.n_lstm, self.n_lstm), 'W_hif', 'ortho')
        self.b_i_f  = init_bias(self.n_lstm, sample='zero')
        self.W_xf_f = init_weight((self.n_in, self.n_lstm), 'W_xf', 'glorot')
        self.W_hf_f = init_weight((self.n_lstm, self.n_lstm), 'W_hf', 'ortho')
        self.b_f_f = init_bias(self.n_lstm, sample='one')
-       self.W_xc_f = init_weight((self.n_in, self.n_lstm), 'W_xc', 'glorot')
-       self.W_hc_f = init_weight((self.n_lstm, self.n_lstm), 'W_hc', 'ortho')
+       self.W_xc_f = init_weight((self.n_in, self.n_lstm), 'W_xcf', 'glorot')
+       self.W_hc_f = init_weight((self.n_lstm, self.n_lstm), 'W_hcf', 'ortho')
        self.b_c_f = init_bias(self.n_lstm, sample='zero')
-       self.W_xo_f = init_weight((self.n_in, self.n_lstm), 'W_xo', 'glorot')
-       self.W_ho_f = init_weight((self.n_lstm, self.n_lstm), 'W_ho', 'ortho')
+       self.W_xo_f = init_weight((self.n_in, self.n_lstm), 'W_xof', 'glorot')
+       self.W_ho_f = init_weight((self.n_lstm, self.n_lstm), 'W_hof', 'ortho')
        self.b_o_f = init_bias(self.n_lstm, sample='zero')
-       self.W_hy_f = init_weight((self.n_lstm, self.n_out), 'W_hy', 'glorot')
+       self.W_hy_f = init_weight((self.n_lstm, self.n_out), 'W_hyf', 'glorot')
 
        #Backward weights
-       self.W_xi_b = init_weight((self.n_in, self.n_lstm), 'W_xi', 'glorot')
-       self.W_hi_b = init_weight((self.n_lstm, self.n_lstm), 'W_hi', 'ortho')
+       self.W_xi_b = init_weight((self.n_in, self.n_lstm), 'W_xib', 'glorot')
+       self.W_hi_b = init_weight((self.n_lstm, self.n_lstm), 'W_hib', 'ortho')
        self.b_i_b  = init_bias(self.n_lstm, sample='zero')
-       self.W_xf_b = init_weight((self.n_in, self.n_lstm), 'W_xf', 'glorot')
-       self.W_hf_b = init_weight((self.n_lstm, self.n_lstm), 'W_hf', 'ortho')
+       self.W_xf_b = init_weight((self.n_in, self.n_lstm), 'W_xfb', 'glorot')
+       self.W_hf_b = init_weight((self.n_lstm, self.n_lstm), 'W_hfb', 'ortho')
        self.b_f_b = init_bias(self.n_lstm, sample='one')
-       self.W_xc_b = init_weight((self.n_in, self.n_lstm), 'W_xc', 'glorot')
-       self.W_hc_b = init_weight((self.n_lstm, self.n_lstm), 'W_hc', 'ortho')
+       self.W_xc_b = init_weight((self.n_in, self.n_lstm), 'W_xcb', 'glorot')
+       self.W_hc_b = init_weight((self.n_lstm, self.n_lstm), 'W_hcb', 'ortho')
        self.b_c_b = init_bias(self.n_lstm, sample='zero')
-       self.W_xo_b = init_weight((self.n_in, self.n_lstm), 'W_xo', 'glorot')
-       self.W_ho_b = init_weight((self.n_lstm, self.n_lstm), 'W_ho', 'ortho')
+       self.W_xo_b = init_weight((self.n_in, self.n_lstm), 'W_xob', 'glorot')
+       self.W_ho_b = init_weight((self.n_lstm, self.n_lstm), 'W_hob', 'ortho')
        self.b_o_b = init_bias(self.n_lstm, sample='zero')
-       self.W_hy_b = init_weight((self.n_lstm, self.n_out), 'W_hy', 'glorot')
+       self.W_hy_b = init_weight((self.n_lstm, self.n_out), 'W_hyb', 'glorot')
 
        self.b_y = init_bias(self.n_out, sample='zero')
 
@@ -85,7 +85,7 @@ class blstmnp:
                                          outputs_info=[h0, c0])
 
        h_b=h_b[:,::-1]
-       y_vals=T.dot(h_f, self.W_hy_f)+T.dot(h_b, self.W_hy_b)+self.b_y
+       y_vals=T.tanh(T.dot(h_f, self.W_hy_f)+T.dot(h_b, self.W_hy_b)+self.b_y)
 
        self.output = y_vals.dimshuffle(1,0,2)
 

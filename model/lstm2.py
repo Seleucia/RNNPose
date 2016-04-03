@@ -2,7 +2,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_pweight,init_bias,get_err_fn
+from helper.utils import init_weight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
 
 dtype = T.config.floatX

@@ -9,7 +9,7 @@ import theano
 
 def train_rnn(params):
    data=[]
-   for sindex in range(0,params['seq_length'],3):
+   for sindex in range(0,params['seq_length'],5):
        (X_train,Y_train,X_test,Y_test)=du.load_pose(params,sindex=sindex)
        data.append((X_train,Y_train,X_test,Y_test))
    (X_train,Y_train,X_test,Y_test)=data[0]
@@ -35,11 +35,16 @@ def train_rnn(params):
    train_errors = np.ndarray(nb_epochs)
    u.log_write("Training started",params)
    val_counter=0
-   best_loss=0
+   best_loss=10000
    for epoch_counter in range(nb_epochs):
       (X_train,Y_train,X_test,Y_test)=data[np.mod(epoch_counter,len(data))]
       if params['shufle_data']==1:
          X_train,Y_train=du.shuffle_in_unison_inplace(X_train,Y_train)
+      n_train_batches = len(X_train)
+      n_train_batches /= batch_size
+
+      n_test_batches = len(X_test)
+      n_test_batches /= batch_size
       batch_loss = 0.
       for minibatch_index in range(n_train_batches):
           x=X_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
@@ -67,13 +72,13 @@ def train_rnn(params):
              else:
                 pred = model.predictions(x)
 
-             loss=np.nanmean(np.abs(pred -y))
+             loss=np.nanmean(np.abs(pred -y)**2)
              loss3d =u.get_loss(y,pred)
              batch_loss += loss
              batch_loss3d += loss3d
           batch_loss/=n_test_batches
           batch_loss3d/=n_test_batches
-          if(best_loss<batch_loss3d):
+          if(batch_loss3d<best_loss):
              best_loss=batch_loss3d
              ext=str(batch_loss3d)+"_best.p"
              u.write_params(model.params,params,ext)

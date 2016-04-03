@@ -1,4 +1,5 @@
 import numpy
+from random import uniform
 import theano
 import theano.tensor as T
 import os
@@ -9,11 +10,44 @@ import pickle
 
 dtype = T.config.floatX
 
+def rescale_weights(params, incoming_max):
+    incoming_max = np.cast[theano.config.floatX](incoming_max)
+    for p in params:
+        w = p.get_value()
+        w_sum = (w**2).sum(axis=0)
+        w[:, w_sum>incoming_max] = w[:, w_sum>incoming_max] * np.sqrt(incoming_max) / w_sum[w_sum>incoming_max]
+        p.set_value(w)
 
 def numpy_floatX(data):
     return numpy.asarray(data, dtype=T.config.floatX)
 
-def init_bias(n_out, sample='zero'):
+def conv_output_length(input_length, filter_size, border_mode, stride):
+    if input_length is None:
+        return None
+    assert border_mode in {'same', 'valid'}
+    if border_mode == 'same':
+        output_length = input_length
+    elif border_mode == 'valid':
+        output_length = input_length - filter_size + 1
+    return (output_length + stride - 1) // stride
+
+def get_fans(shape):
+    if len(shape) == 2:
+        fan_in = shape[0]
+        fan_out = shape[1]
+    elif len(shape) == 4 or len(shape) == 5:
+        # assuming convolution kernels (2D or 3D).
+        # TH kernel shape: (depth, input_depth, ...)
+        # TF kernel shape: (..., input_depth, depth)
+        fan_in = np.prod(shape[1:])
+        fan_out = shape[0]
+    else:
+        # no specific assumptions
+        fan_in = np.sqrt(np.prod(shape))
+        fan_out = np.sqrt(np.prod(shape))
+    return fan_in, fan_out
+
+def init_bias(n_out,rng, sample='zero'):
     if sample == 'zero':
         b = np.zeros((n_out,), dtype=dtype)
     elif sample == 'one':
@@ -21,47 +55,19 @@ def init_bias(n_out, sample='zero'):
     elif sample == 'uni':
         b=shared(np.cast[dtype](np.random.uniform(-0.5,.5,size = n_out)))
     elif sample == 'big_uni':
-        b=np.asarray(np.random.uniform(low=-5,high=5,size=n_out),dtype=dtype);
+        b=np.asarray(rng.uniform(low=-5,high=5,size=n_out),dtype=dtype);
     else:
         raise ValueError("Unsupported initialization scheme: %s"
                          % sample)
     b = theano.shared(value=b, name='b')
     return b
 
-
-def init_pweight(shape, name, sample='glorot', seed=None):
-    rng = np.random.RandomState(seed)
-
-    if sample == 'glorot':
-        ''' Reference: Glorot & Bengio, AISTATS 2010
-        '''
-        fan_in, fan_out = shape[0],shape[1]
-        s = np.sqrt(2. / (fan_in + fan_out))
-        values=np.random.normal(loc=0.0, scale=s, size=(shape[0],)).astype(dtype)
-    elif sample == 'ortho':
-        ''' From Lasagne. Reference: Saxe et al., http://arxiv.org/abs/1312.6120
-        '''
-        scale=1.1
-        flat_shape = (shape[0], np.prod(shape[1:]))
-        a = np.random.normal(0.0, 1.0, flat_shape)
-        u, _, v = np.linalg.svd(a, full_matrices=False)
-        # pick the one with the correct shape
-        q = u if u.shape == flat_shape else v
-        q = q.reshape(shape)
-        values= np.asarray(scale * q[:shape[0], :shape[1]], dtype=dtype)
-    else:
-        raise ValueError("Unsupported initialization scheme: %s"
-                         % sample)
-
-    return shared(values, name=name, borrow=True)
-
-def init_weight(shape, name, sample='glorot', seed=None):
-    rng = np.random.RandomState(seed)
-
+def init_weight(shape, rng,name, sample='glorot', seed=None):
     if sample == 'unishape':
+        fan_in, fan_out =get_fans(shape)
         values = rng.uniform(
-            low=-np.sqrt(6. / (shape[0] + shape[1])),
-            high=np.sqrt(6. / (shape[0] + shape[1])),
+            low=-np.sqrt(6. / (fan_in + fan_out)),
+            high=np.sqrt(6. / (fan_in + fan_out)),
             size=shape).astype(dtype)
 
     elif sample == 'svd':
@@ -76,7 +82,7 @@ def init_weight(shape, name, sample='glorot', seed=None):
     elif sample == 'glorot':
         ''' Reference: Glorot & Bengio, AISTATS 2010
         '''
-        fan_in, fan_out = shape[0],shape[1]
+        fan_in, fan_out =get_fans(shape)
         s = np.sqrt(2. / (fan_in + fan_out))
         values=np.random.normal(loc=0.0, scale=s, size=shape).astype(dtype)
     elif sample == 'ortho':
@@ -104,46 +110,6 @@ def init_weight(shape, name, sample='glorot', seed=None):
                          % sample)
 
     return shared(values, name=name, borrow=True)
-
-def init_W_b(W, b, rng, n_in, n_out):
-    # for a discussion of the initialization, see
-    # https://plus.google.com/+EricBattenberg/posts/f3tPKjo7LFa
-    if W is None:
-        W_values = numpy.asarray(
-            rng.uniform(
-                low=-numpy.sqrt(6./(n_in + n_out)),
-                high=numpy.sqrt(6./(n_in + n_out)),
-                size=(n_in, n_out)
-                ),
-            dtype=theano.config.floatX
-        )
-        W = theano.shared(value=W_values, name='W', borrow=True)
-
-    # init biases to positive values, so we should be initially in the linear regime of the linear rectified function
-    if b is None:
-        b_values = numpy.ones((n_out,), dtype=theano.config.floatX) * numpy.cast[theano.config.floatX](0.01)
-        b = theano.shared(value=b_values, name='b', borrow=True)
-    return W, b
-
-def init_CNNW_b(W, b, rng, n_in, n_out,fshape):
-    # for a discussion of the initialization, see
-    # https://plus.google.com/+EricBattenberg/posts/f3tPKjo7LFa
-    if W is None:
-        W_values = numpy.asarray(
-            rng.uniform(
-                low=-numpy.sqrt(6./(n_in + n_out)),
-                high=numpy.sqrt(6./(n_in + n_out)),
-                size=(n_in, n_out)
-                ),
-            dtype=theano.config.floatX
-        )
-        W = theano.shared(value=W_values, name='W', borrow=True)
-
-    # init biases to positive values, so we should be initially in the linear regime of the linear rectified function
-    if b is None:
-        b_values = numpy.ones((fshape,), dtype=theano.config.floatX) * numpy.cast[theano.config.floatX](0.01)
-        b = theano.shared(value=b_values, name='b', borrow=True)
-    return W, b
 
 def get_err_fn(self,cost_function,Y):
        cxe = T.mean(T.nnet.binary_crossentropy(self.output, Y))
@@ -191,25 +157,40 @@ def get_loss(gt,est):
     loss=0
     for b in range(batch_size):
         for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3))*2 #13*3
+            diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3))*2 #13*3
             sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
             loss +=np.nanmean(sq_m)
     loss/=(seq_length*batch_size)
     return (loss)
 
 def get_loss_bb(gt,est):
+    sf="/home/coskun/PycharmProjects/RNNPose21/data/blanket.txt"
     batch_size=gt.shape[0]
     seq_length=gt.shape[1]
     loss=0
     loss_list=[]
-    for b in range(batch_size):
-        for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(13,3) - est[b][s].reshape(13,3))*2 #54*3
-            b_l=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
-            loss_list.append(b_l)
-            loss +=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
-    loss/=(seq_length*batch_size)
-    return (loss,loss_list)
+    seq_list=[]
+    b_seq_list=[]
+    with open(sf,"a") as f_handle:
+        for b in range(batch_size):
+            seq_los=[0]*seq_length
+            for s in range(seq_length):
+                diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3))*2 #14,3
+                val=np.sqrt(np.sum(diff_vec**2,axis=1))
+                for i in range(14):
+                    f=val[i]
+                    f_handle.write("%f"%(f))
+                    if(i<13):
+                        f_handle.write(";")
+                f_handle.write('\n')
+                b_l=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
+                loss_list.append(b_l)
+                seq_los[s]=b_l
+                loss +=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
+            b_seq_list.append(seq_los)
+        seq_list=np.mean(b_seq_list,axis=0)
+        loss/=(seq_length*batch_size)
+    return (loss,loss_list,seq_list)
 
 rng = numpy.random.RandomState(1234)
 srng = T.shared_randomstreams.RandomStreams(rng.randint(999999))
@@ -366,7 +347,7 @@ def write_params(mparams,params,ext):
         os.remove(fpath)
     with open(fpath,"a") as f:
         pickle.dump([param.get_value() for param in mparams], f, protocol=pickle.HIGHEST_PROTOCOL)
-        print("Model saved"+filename)
+        print("Model saved: "+filename)
 
 
 def read_params(params):

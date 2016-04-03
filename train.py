@@ -4,10 +4,10 @@ import helper.config as config
 import model.model_provider as model_provider
 import helper.dt_utils as du
 import helper.utils as u
-import theano
-
+from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 def train_rnn(params):
+   rng = RandomStreams(seed=1234)
    (X_train,Y_train,X_test,Y_test)=du.load_pose(params)
    params["len_train"]=X_train.shape[0]*X_train.shape[1]
    params["len_test"]=X_test.shape[0]*X_test.shape[1]
@@ -26,12 +26,12 @@ def train_rnn(params):
    if params['resume']==1:
       model= model_provider.get_model_pretrained(params)
    else:
-     model= model_provider.get_model(params)
+     model= model_provider.get_model(params,rng)
    u.log_write("Number of parameters: %s"%(model.n_param),params)
    train_errors = np.ndarray(nb_epochs)
    u.log_write("Training started",params)
    val_counter=0
-   best_loss=0
+   best_loss=10000
    for epoch_counter in range(nb_epochs):
       batch_loss = 0.
       for minibatch_index in range(n_train_batches):
@@ -61,14 +61,13 @@ def train_rnn(params):
                 pred = model.predictions(x,x_b)
              else:
                 pred = model.predictions(x)
-
-             loss=np.nanmean(np.abs(pred -y))
+             loss=np.nanmean(np.abs(pred -y)**2)
              loss3d =u.get_loss(y,pred)
              batch_loss += loss
              batch_loss3d += loss3d
           batch_loss/=n_test_batches
           batch_loss3d/=n_test_batches
-          if(best_loss<batch_loss3d):
+          if(batch_loss3d<best_loss):
              best_loss=batch_loss3d
              ext=str(batch_loss3d)+"_best.p"
              u.write_params(model.params,params,ext)

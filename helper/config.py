@@ -5,17 +5,17 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=1 #0,full,1:only for check, 2: very small ds, 3:only ICL data
-   params["rn_id"]="model_test" #running id, model
-   params["notes"]="Im testing my data loading approach" #running id
+   params['run_mode']=0 #0,full,1:resume, 2,X
+   params["rn_id"]="normal_b" #running id, model
+   params["notes"]="blanket lstm simple running" #running id
    params["model"]="blstmnp"#kccnr,dccnr
    params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
    params['resume']= 0
-   params['mfile']= "gru_model_test_x.p"
+   params['mfile']= "lstm_normal_0.p"
 
-   params['batch_size']=62
+   params['batch_size']=30
    params['shufle_data']=1
    params['max_count']= 300
 
@@ -25,7 +25,7 @@ def get_params():
    params['wd']=wd
    params['log_file']=wd+"/logs/"+params["model"]+"_"+params["rn_id"]+"_"+str(params['run_mode'])+"_"+utils.get_time()+".txt"
    params["model_file"]=wd+"/cp/"
-   params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/30k/"
+   params["data_dir"]="/home/coskun/projects/data/old_blanket/"
 
 
 
@@ -36,12 +36,12 @@ def get_params():
 
    # learning parameters
    params['momentum']=0.9    # the params for momentum
-   params['lr']=0.0001
+   params['lr']=0.00001
    params['learning_rate_decay']= 0.998
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600
    params['n_hidden']= 512
-   params['n_output']= 39
+   params['n_output']= 42
 
    if(platform.node()=="coskunh"):
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
@@ -53,14 +53,14 @@ def get_params():
        params['max_count']= 100000
 
    if(platform.node()=="milletari-workstation"):
-       params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/30k/"
+       #params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/180k/"
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
        params['max_count']= 30000000
 
    if(platform.node()=="cmp-comp"):
-       params['batch_size']=62
+       params['batch_size']=60
        params["n_procc"]=1
        params["WITH_GPU"]=True
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
