@@ -24,12 +24,17 @@ def numpy_floatX(data):
 def conv_output_length(input_length, filter_size, border_mode, stride):
     if input_length is None:
         return None
-    assert border_mode in {'same', 'valid'}
-    if border_mode == 'same':
-        output_length = input_length
+    assert border_mode in {'full', 'valid'}
+    if border_mode == 'full':
+        output_length = input_length++ filter_size-1
     elif border_mode == 'valid':
         output_length = input_length - filter_size + 1
     return (output_length + stride - 1) // stride
+
+      # 'valid'only apply filter to complete patches of the image. Generates
+      #  output of shape: image_shape - filter_shape + 1.
+      #  'full' zero-pads image to multiple of filter shape to generate output
+      #  of shape: image_shape + filter_shape - 1.
 
 def get_fans(shape):
     if len(shape) == 2:
@@ -154,13 +159,20 @@ def write_pred(est,bindex,G_list,params):
 def get_loss(gt,est):
     batch_size=gt.shape[0]
     seq_length=gt.shape[1]
-    loss=0
+    loss=[]
+    counter=0
     for b in range(batch_size):
         for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3))*2 #13*3
+            diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3)) #13*3
+            diff_vec=diff_vec[~np.any(np.isnan(diff_vec), axis=1)]
+            # print(diff_vec)
+            # print("+++++++++++++++++++")
             sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
-            loss +=np.nanmean(sq_m)
-    loss/=(seq_length*batch_size)
+            # print(sq_m)
+            # print("-------------------")
+            loss.append(np.mean(sq_m))
+    # print "b %d, %d, %f"%(batch_size,seq_length,loss)
+    loss=np.nanmean(loss)
     return (loss)
 
 def get_loss_bb(gt,est):

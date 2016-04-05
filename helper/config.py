@@ -8,16 +8,16 @@ def get_params():
    params['run_mode']=0 #0,full,1:resume, 2,X
    params["rn_id"]="normal_b" #running id, model
    params["notes"]="blanket lstm simple running" #running id
-   params["model"]="blstmnp"#kccnr,dccnr
-   params["optimizer"]="RMSprop" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
+   params["model"]="cnn_lstm"#kccnr,dccnr
+   params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
    params['resume']= 0
    params['mfile']= "lstm_normal_0.p"
 
-   params['batch_size']=30
+   params['batch_size']=25
    params['shufle_data']=1
-   params['max_count']= 300
+   params['max_count']= 10
 
    #system settings
    wd=os.path.dirname(os.path.realpath(__file__))
@@ -50,14 +50,14 @@ def get_params():
        params['n_patch']= 1
        params['n_repeat']= 1
        params['n_hidden']= 128
-       params['max_count']= 100000
+       params['max_count']= 10000000
 
    if(platform.node()=="milletari-workstation"):
-       #params["data_dir"]="/home/coskun/PycharmProjects/data/rnn/180k/"
+       params["data_dir"]="/mnt/Data2/DataFelix/dt/"
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']= 30000000
+       params['max_count']= 100000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60

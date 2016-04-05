@@ -1,9 +1,7 @@
 import helper.utils as u
-from theano.tensor.signal import pool
 import theano.tensor.signal.downsample as downsample
 import theano.tensor.nnet as nn
 import theano.tensor as T
-import numpy as np
 from theano.tensor.nnet import conv2d #Check if it is using gpu or not
 
 class LogisticRegression(object):
@@ -50,7 +48,8 @@ class ConvLayer(object):
             input=input,
             filters=self.W,
             filter_shape=filter_shape,
-            input_shape=input_shape
+            input_shape=input_shape,
+            border_mode=border_mode
 
         )
         output = conv_out + b.dimshuffle('x', 0, 'x', 'x')

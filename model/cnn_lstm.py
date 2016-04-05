@@ -9,11 +9,12 @@ import theano.tensor.nnet as nn
 from helper.utils import init_weight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
 
-theano.config.exception_verbosity="high"
+# theano.config.exception_verbosity="high"
 dtype = T.config.floatX
 
 class cnn_lstm(object):
     def __init__(self,rng,params,cost_function='mse',optimizer = RMSprop):
+
         lr=params["lr"]
         n_lstm=params['n_hidden']
         n_out=params['n_output']
@@ -27,27 +28,49 @@ class cnn_lstm(object):
 
 
         cnn_batch_size=batch_size*sequence_length
-        nb_filter=2
-        nb_row=11
-        nb_col=11
-        filter_shape=(11,11)
+        pool_size=(2,2)
+        nb_filter=64
+        nb_row=9
+        nb_col=9
+        filter_shape=(9,9)
         border_mode="valid"
         subsample=(1,1)
-        input_shape=(cnn_batch_size,1,32,32) #input_shape= (samples, channels, rows, cols)
+        input_shape=(cnn_batch_size,1,120,60) #input_shape= (samples, channels, rows, cols)
         input= X.reshape(input_shape)
-
-        # (512-11+1 , 424-11+1) = (502, 414) filter operation
         c1=ConvLayer(rng, input, nb_filter, nb_row, nb_col,input_shape,filter_shape,border_mode,subsample, activation=nn.relu)
-        dl1=DropoutLayer(rng,input=c1.output,prob=0.5)
-        c2=ConvLayer(rng, dl1.output, nb_filter, nb_row, nb_col,c1.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+        p1=PoolLayer(c1.output,pool_size=pool_size,input_shape=c1.output_shape,border_mode=border_mode)
+        dl1=DropoutLayer(rng,input=p1.output,prob=0.5)
+        #
+        #
+        nb_filter=128
+        nb_row=3
+        nb_col=3
+        filter_shape=(3,3)
+        subsample=(1,1)
+        c2=ConvLayer(rng, dl1.output, nb_filter, nb_row, nb_col,p1.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+        p2=PoolLayer(c2.output,pool_size=pool_size,input_shape=c2.output_shape,border_mode=border_mode)
+        #
+        #
+        nb_filter=128
+        nb_row=3
+        nb_col=3
+        filter_shape=(3,3)
+        subsample=(1,1)
+        c3=ConvLayer(rng, p2.output, nb_filter, nb_row, nb_col,p2.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+        p3=PoolLayer(c3.output,pool_size=pool_size,input_shape=c3.output_shape,border_mode=border_mode)
+        #
+        #
+        # nb_filter=512
+        # nb_row=13
+        # nb_col=5
+        # filter_shape=(13,5)
+        # subsample=(1,1)
+        # c4=ConvLayer(rng, p3.output, nb_filter, nb_row, nb_col,p3.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+        # p4=PoolLayer(c4.output,pool_size=pool_size,input_shape=c4.output_shape,border_mode=border_mode)
+        #
 
-        pool_size=(2,2)
-        # (40,502/10, 424/10) = (40,50, 40)
-        p1=PoolLayer(c2.output,pool_size=pool_size,input_shape=c2.output_shape)
-        # (40,50/10, 40/10) = (40,5, 4)
-        p2=PoolLayer(p1.output,pool_size=pool_size,input_shape=p1.output_shape)
-
-        n_in= reduce(lambda x, y: x*y, p2.output_shape[1:])
+        n_in= reduce(lambda x, y: x*y, p3.output_shape[1:])
+        x_flat = p3.output.flatten(2)
 
         self.n_in = n_in
         self.n_lstm = n_lstm
@@ -77,9 +100,6 @@ class cnn_lstm(object):
            y_t = T.tanh(T.dot(hh_t, self.W_hy) + self.b_y)
            return [hh_t, y_t]
 
-
-        x_flat = p2.output.flatten(2)
-
         rnn_input = x_flat.reshape((batch_size,sequence_length, n_in))
         h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
 
@@ -94,7 +114,7 @@ class cnn_lstm(object):
 
         self.output = y_vals.dimshuffle(1,0,2)
 
-        self.params +=c1.params
+        self.params =self.params+c1.params+c2.params+c3.params
 
         cost=get_err_fn(self,cost_function,Y)
         _optimizer = optimizer(cost, self.params, lr=lr)
