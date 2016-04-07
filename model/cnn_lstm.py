@@ -1,12 +1,10 @@
-import glob
 from theano import shared
 import numpy as np
-from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 import theano
 import theano.tensor as T
 from layers import ConvLayer,PoolLayer,HiddenLayer,DropoutLayer
 import theano.tensor.nnet as nn
-from helper.utils import init_weight,init_bias,get_err_fn
+from helper.utils import init_weight,init_bias,get_err_fn,count_params
 from helper.optimizer import RMSprop
 
 # theano.config.exception_verbosity="high"
@@ -38,7 +36,7 @@ class cnn_lstm(object):
         input_shape=(cnn_batch_size,1,120,60) #input_shape= (samples, channels, rows, cols)
         input= X.reshape(input_shape)
         c1=ConvLayer(rng, input,filter_shape, input_shape,border_mode,subsample, activation=nn.relu)
-        p1=PoolLayer(c1.output,pool_size=pool_size,input_shape=c1.output_shape,border_mode=border_mode)
+        p1=PoolLayer(c1.output,pool_size=pool_size,input_shape=c1.output_shape)
         dl1=DropoutLayer(rng,input=p1.output,prob=p_1)
         retain_prob = 1. - p_1
         test_output = p1.output*retain_prob
@@ -47,13 +45,13 @@ class cnn_lstm(object):
         #Layer2: conv2+pool
         filter_shape=(128,p1.output_shape[1],3,3)
         c2=ConvLayer(rng, d1_output, filter_shape,p1.output_shape,border_mode,subsample, activation=nn.relu)
-        p2=PoolLayer(c2.output,pool_size=pool_size,input_shape=c2.output_shape,border_mode=border_mode)
+        p2=PoolLayer(c2.output,pool_size=pool_size,input_shape=c2.output_shape)
 
 
         #Layer3: conv2+pool
         filter_shape=(128,p2.output_shape[1],3,3)
         c3=ConvLayer(rng, p2.output,filter_shape,p2.output_shape,border_mode,subsample, activation=nn.relu)
-        p3=PoolLayer(c3.output,pool_size=pool_size,input_shape=c3.output_shape,border_mode=border_mode)
+        p3=PoolLayer(c3.output,pool_size=pool_size,input_shape=c3.output_shape)
 
         #Layer4: hidden
         n_in= reduce(lambda x, y: x*y, p3.output_shape[1:])
@@ -111,4 +109,4 @@ class cnn_lstm(object):
         _optimizer = optimizer(cost, self.params, lr=lr)
         self.train = theano.function(inputs=[X,Y,is_train],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
         self.predictions = theano.function(inputs = [X,is_train], outputs = self.output,allow_input_downcast=True)
-        self.n_param=n_lstm*n_lstm*4+n_in*n_lstm*4+n_lstm*n_out+n_lstm*3
+        self.n_param=count_params(self.params)

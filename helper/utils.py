@@ -351,6 +351,11 @@ def mean_squared_epislon_insensitive(y_true, y_pred):
 msei=mean_squared_epislon_insensitive
 ah=alpha_huber
 
+def count_params(model_params):
+    coun_params=np.sum([np.prod(p.shape.eval()) for p in model_params ])
+    return coun_params
+
+
 def write_params(mparams,params,ext):
     wd=params["wd"]
     filename=params['model']+"_"+params["rn_id"]+"_"+ext

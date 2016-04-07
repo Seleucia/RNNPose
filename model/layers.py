@@ -1,5 +1,5 @@
 import helper.utils as u
-import theano.tensor.signal.downsample as downsample
+import theano.tensor.signal.pool as pool
 import theano.tensor.nnet as nn
 import theano.tensor as T
 from theano.tensor.nnet import conv2d #Check if it is using gpu or not
@@ -76,10 +76,11 @@ class DropoutLayer(object):
         self.output= input
 
 class PoolLayer(object):
-    def __init__(self, input,pool_size,input_shape,strides=(1, 1),border_mode = 'same', pool_mode="max"):
-        pooled_out = downsample.max_pool_2d(
+    def __init__(self, input,pool_size,input_shape, pool_mode="max"):
+        pooled_out = pool.pool_2d(
             input=input,
             ds=pool_size,
+            mode=pool_mode,
             ignore_border=True
         )
 
@@ -88,7 +89,6 @@ class PoolLayer(object):
         cols = input_shape[3]
         rows = rows /  pool_size[0]
         cols = cols /  pool_size[1]
-
         self.output_shape= (input_shape[0], input_shape[1], rows, cols)
 
         self.output= pooled_out
