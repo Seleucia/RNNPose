@@ -16,7 +16,7 @@ class LogisticRegression(object):
 
 
 class HiddenLayer(object):
-    def __init__(self, rng, input, n_in, n_out,activation=nn.relu):
+    def __init__(self, rng, input, n_in, n_out,activation=T.tanh):
         self.input = input
         shape=[n_in,n_out]
         W =u.init_weight(shape=shape,rng=rng,name="w_hid",sample="glorot")
@@ -25,7 +25,7 @@ class HiddenLayer(object):
         self.b = b
 
         lin_output = T.dot(input, self.W) + self.b
-        self.output = activation(lin_output, 0)
+        self.output = activation(lin_output)
         # parameters of the model
         self.params = [self.W, self.b]
 
@@ -49,7 +49,7 @@ class ConvLayer(object):
             filters=self.W,
             filter_shape=filter_shape,
             input_shape=input_shape,
-            border_mode=border_mode
+            border_mode=border_mode,subsample=subsample
 
         )
         output = conv_out + b.dimshuffle('x', 0, 'x', 'x')
@@ -72,7 +72,7 @@ class DropoutLayer(object):
     def __init__(self, rng, input, prob):
         retain_prob = 1. - prob
         input *= rng.binomial(size=input.shape, p=retain_prob, dtype=input.dtype)
-        input /= retain_prob #Why dividing ?
+        # input /= retain_prob #Why dividing ?
         self.output= input
 
 class PoolLayer(object):

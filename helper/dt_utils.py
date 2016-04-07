@@ -14,7 +14,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    min_tr=0.000000
    max_tr=3
-   norm=1#numpy.linalg.norm(X_test)
+   norm=2#numpy.linalg.norm(X_test)
 
    istest=True
    get_flist=False

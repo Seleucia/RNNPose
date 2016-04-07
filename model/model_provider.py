@@ -37,8 +37,8 @@ def get_model(params,rng):
         model=None
     return model
 
-def get_model_pretrained(params):
+def get_model_pretrained(params,rng):
     mparams=u.read_params(params)
-    model=get_model(params)
+    model=get_model(params,rng)
     model=u.set_params(model,mparams)
     return model

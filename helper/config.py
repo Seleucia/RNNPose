@@ -6,16 +6,15 @@ def get_params():
    global params
    params={}
    params['run_mode']=0 #0,full,1:resume, 2,X
-   params["rn_id"]="normal_b" #running id, model
+   params["rn_id"]="resume" #running id, model
    params["notes"]="blanket lstm simple running" #running id
    params["model"]="cnn_lstm"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
-   params['resume']= 0
-   params['mfile']= "lstm_normal_0.p"
+   params['mfile']= "cnn_lstm_normal_b_0.147931477267_best.p"
 
-   params['batch_size']=25
+   params['batch_size']=20
    params['shufle_data']=1
    params['max_count']= 10
 
@@ -57,7 +56,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']= 100000
+       params['max_count']=5000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60
@@ -66,7 +65,7 @@ def get_params():
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
        params["data_dir"]="/home/cmp/PycharmProjects/data/rnn/"
        params['n_hidden']= 128
-       params['max_count']= 3000000
+       params['max_count']= 30
 
    #params['step_size']=[10]
    params['test_size']=0.20 #Test size

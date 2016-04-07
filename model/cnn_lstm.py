@@ -4,7 +4,7 @@ import numpy as np
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 import theano
 import theano.tensor as T
-from layers import ConvLayer,PoolLayer,LogisticRegression,DropoutLayer
+from layers import ConvLayer,PoolLayer,HiddenLayer,DropoutLayer
 import theano.tensor.nnet as nn
 from helper.utils import init_weight,init_bias,get_err_fn
 from helper.optimizer import RMSprop
@@ -24,10 +24,13 @@ class cnn_lstm(object):
         # minibatch)
         X = T.tensor3() # batch of sequence of vector
         Y = T.tensor3() # batch of sequence of vector
+        is_train = T.iscalar('is_train') # pseudo boolean for switching between training and prediction
+
 
 
 
         cnn_batch_size=batch_size*sequence_length
+        p_1=0.5
         pool_size=(2,2)
         nb_filter=64
         nb_row=9
@@ -39,7 +42,13 @@ class cnn_lstm(object):
         input= X.reshape(input_shape)
         c1=ConvLayer(rng, input, nb_filter, nb_row, nb_col,input_shape,filter_shape,border_mode,subsample, activation=nn.relu)
         p1=PoolLayer(c1.output,pool_size=pool_size,input_shape=c1.output_shape,border_mode=border_mode)
-        dl1=DropoutLayer(rng,input=p1.output,prob=0.5)
+        dl1=DropoutLayer(rng,input=p1.output,prob=p_1)
+
+        retain_prob = 1. - p_1
+
+        test_output = p1.output*retain_prob
+        d1_output = T.switch(T.neq(is_train, 0), dl1.output, test_output)
+
         #
         #
         nb_filter=128
@@ -47,7 +56,7 @@ class cnn_lstm(object):
         nb_col=3
         filter_shape=(3,3)
         subsample=(1,1)
-        c2=ConvLayer(rng, dl1.output, nb_filter, nb_row, nb_col,p1.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+        c2=ConvLayer(rng, d1_output, nb_filter, nb_row, nb_col,p1.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
         p2=PoolLayer(c2.output,pool_size=pool_size,input_shape=c2.output_shape,border_mode=border_mode)
         #
         #
@@ -58,8 +67,14 @@ class cnn_lstm(object):
         subsample=(1,1)
         c3=ConvLayer(rng, p2.output, nb_filter, nb_row, nb_col,p2.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
         p3=PoolLayer(c3.output,pool_size=pool_size,input_shape=c3.output_shape,border_mode=border_mode)
-        #
-        #
+
+        n_in= reduce(lambda x, y: x*y, p3.output_shape[1:])
+        x_flat = p3.output.flatten(2)
+
+        h1=HiddenLayer(rng,x_flat,n_in,1024)
+        n_in=1024
+        rnn_input = h1.output.reshape((batch_size,sequence_length, n_in))
+
         # nb_filter=512
         # nb_row=13
         # nb_col=5
@@ -69,8 +84,7 @@ class cnn_lstm(object):
         # p4=PoolLayer(c4.output,pool_size=pool_size,input_shape=c4.output_shape,border_mode=border_mode)
         #
 
-        n_in= reduce(lambda x, y: x*y, p3.output_shape[1:])
-        x_flat = p3.output.flatten(2)
+
 
         self.n_in = n_in
         self.n_lstm = n_lstm
@@ -100,7 +114,7 @@ class cnn_lstm(object):
            y_t = T.tanh(T.dot(hh_t, self.W_hy) + self.b_y)
            return [hh_t, y_t]
 
-        rnn_input = x_flat.reshape((batch_size,sequence_length, n_in))
+
         h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
 
         #(1, 0, 2) -> AxBxC to BxAxC
@@ -114,10 +128,10 @@ class cnn_lstm(object):
 
         self.output = y_vals.dimshuffle(1,0,2)
 
-        self.params =self.params+c1.params+c2.params+c3.params
+        self.params =self.params+c1.params+c2.params+c3.params+h1.params
 
         cost=get_err_fn(self,cost_function,Y)
         _optimizer = optimizer(cost, self.params, lr=lr)
-        self.train = theano.function(inputs=[X,Y],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
-        self.predictions = theano.function(inputs = [X], outputs = self.output,allow_input_downcast=True)
+        self.train = theano.function(inputs=[X,Y,is_train],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
+        self.predictions = theano.function(inputs = [X,is_train], outputs = self.output,allow_input_downcast=True)
         self.n_param=n_lstm*n_lstm*4+n_in*n_lstm*4+n_lstm*n_out+n_lstm*3

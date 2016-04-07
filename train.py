@@ -23,8 +23,8 @@ def train_rnn(params):
 
    print("Batch size: %i, train batch size: %i, test batch size: %i"%(batch_size,n_train_batches,n_test_batches))
    u.log_write("Model build started",params)
-   if params['resume']==1:
-      model= model_provider.get_model_pretrained(params)
+   if params['run_mode']==1:
+      model= model_provider.get_model_pretrained(params,rng)
    else:
      model= model_provider.get_model(params,rng)
    u.log_write("Number of parameters: %s"%(model.n_param),params)
@@ -37,11 +37,12 @@ def train_rnn(params):
       for minibatch_index in range(n_train_batches):
           x=X_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
           y=Y_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]#60*20*54
+          is_train=1
           if(params["model"]=="blstmnp"):
              x_b=np.asarray(map(np.flipud,x))
              loss = model.train(x,x_b,y)
           else:
-             loss = model.train(x, y)
+             loss = model.train(x, y,is_train)
           batch_loss += loss
       if params['shufle_data']==1:
          X_train,Y_train=du.shuffle_in_unison_inplace(X_train,Y_train)
@@ -51,22 +52,19 @@ def train_rnn(params):
       u.log_write(s,params)
       if(epoch_counter%10==0):
           print("Model testing")
-          batch_loss = 0.
-          batch_loss3d = 0.
+          batch_loss3d = []
           for minibatch_index in range(n_test_batches):
              x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
              y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]
+             is_train=0
              if(params["model"]=="blstmnp"):
                 x_b=np.asarray(map(np.flipud,x))
                 pred = model.predictions(x,x_b)
              else:
-                pred = model.predictions(x)
-             loss=np.nanmean(np.abs(pred -y)**2)
+                pred = model.predictions(x,is_train)
              loss3d =u.get_loss(y,pred)
-             batch_loss += loss
-             batch_loss3d += loss3d
-          batch_loss/=n_test_batches
-          batch_loss3d/=n_test_batches
+             batch_loss3d.append(loss3d)
+          batch_loss3d=np.nanmean(batch_loss3d)
           if(batch_loss3d<best_loss):
              best_loss=batch_loss3d
              ext=str(batch_loss3d)+"_best.p"
@@ -76,7 +74,7 @@ def train_rnn(params):
               u.write_params(model.params,params,ext)
 
           val_counter+=1#0.08
-          s ='VAL--> epoch %i | error %f, %f, %f'%(val_counter,batch_loss,batch_loss3d,n_test_batches)
+          s ='VAL--> epoch %i | error %f, %f'%(val_counter,batch_loss3d,n_test_batches)
           u.log_write(s,params)
 
 
