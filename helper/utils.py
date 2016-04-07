@@ -160,18 +160,12 @@ def get_loss(gt,est):
     batch_size=gt.shape[0]
     seq_length=gt.shape[1]
     loss=[]
-    counter=0
     for b in range(batch_size):
         for s in range(seq_length):
             diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3))*2 #13*3
             diff_vec=diff_vec[~np.any(np.isnan(diff_vec), axis=1)]
-            # print(diff_vec)
-            # print("+++++++++++++++++++")
             sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
-            # print(sq_m)
-            # print("-------------------")
             loss.append(np.mean(sq_m))
-    # print "b %d, %d, %f"%(batch_size,seq_length,loss)
     loss=np.nanmean(loss)
     return (loss)
 
