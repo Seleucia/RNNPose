@@ -26,66 +26,44 @@ class cnn_lstm(object):
         Y = T.tensor3() # batch of sequence of vector
         is_train = T.iscalar('is_train') # pseudo boolean for switching between training and prediction
 
-
-
-
-        cnn_batch_size=batch_size*sequence_length
-        p_1=0.5
-        pool_size=(2,2)
-        nb_filter=64
-        nb_row=9
-        nb_col=9
-        filter_shape=(9,9)
-        border_mode="valid"
+        #CNN global parameters.
         subsample=(1,1)
+        p_1=0.5
+        border_mode="valid"
+        cnn_batch_size=batch_size*sequence_length
+        pool_size=(2,2)
+
+        #Layer1: conv2+pool+drop
+        filter_shape=(64,1,9,9)
         input_shape=(cnn_batch_size,1,120,60) #input_shape= (samples, channels, rows, cols)
         input= X.reshape(input_shape)
-        c1=ConvLayer(rng, input, nb_filter, nb_row, nb_col,input_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+        c1=ConvLayer(rng, input,filter_shape, input_shape,border_mode,subsample, activation=nn.relu)
         p1=PoolLayer(c1.output,pool_size=pool_size,input_shape=c1.output_shape,border_mode=border_mode)
         dl1=DropoutLayer(rng,input=p1.output,prob=p_1)
-
         retain_prob = 1. - p_1
-
         test_output = p1.output*retain_prob
         d1_output = T.switch(T.neq(is_train, 0), dl1.output, test_output)
 
-        #
-        #
-        nb_filter=128
-        nb_row=3
-        nb_col=3
-        filter_shape=(3,3)
-        subsample=(1,1)
-        c2=ConvLayer(rng, d1_output, nb_filter, nb_row, nb_col,p1.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+        #Layer2: conv2+pool
+        filter_shape=(128,p1.output_shape[1],3,3)
+        c2=ConvLayer(rng, d1_output, filter_shape,p1.output_shape,border_mode,subsample, activation=nn.relu)
         p2=PoolLayer(c2.output,pool_size=pool_size,input_shape=c2.output_shape,border_mode=border_mode)
-        #
-        #
-        nb_filter=128
-        nb_row=3
-        nb_col=3
-        filter_shape=(3,3)
-        subsample=(1,1)
-        c3=ConvLayer(rng, p2.output, nb_filter, nb_row, nb_col,p2.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
+
+
+        #Layer3: conv2+pool
+        filter_shape=(128,p2.output_shape[1],3,3)
+        c3=ConvLayer(rng, p2.output,filter_shape,p2.output_shape,border_mode,subsample, activation=nn.relu)
         p3=PoolLayer(c3.output,pool_size=pool_size,input_shape=c3.output_shape,border_mode=border_mode)
 
+        #Layer4: hidden
         n_in= reduce(lambda x, y: x*y, p3.output_shape[1:])
         x_flat = p3.output.flatten(2)
-
         h1=HiddenLayer(rng,x_flat,n_in,1024)
         n_in=1024
         rnn_input = h1.output.reshape((batch_size,sequence_length, n_in))
 
-        # nb_filter=512
-        # nb_row=13
-        # nb_col=5
-        # filter_shape=(13,5)
-        # subsample=(1,1)
-        # c4=ConvLayer(rng, p3.output, nb_filter, nb_row, nb_col,p3.output_shape,filter_shape,border_mode,subsample, activation=nn.relu)
-        # p4=PoolLayer(c4.output,pool_size=pool_size,input_shape=c4.output_shape,border_mode=border_mode)
-        #
 
-
-
+        #Layer5: gru
         self.n_in = n_in
         self.n_lstm = n_lstm
         self.n_out = n_out
@@ -119,7 +97,6 @@ class cnn_lstm(object):
 
         #(1, 0, 2) -> AxBxC to BxAxC
         #(batch_size,sequence_length, n_in) >> (sequence_length, batch_size ,n_in)
-        # ValueError: Input dimension mis-match. (input[0].shape[0] = 2(bs), input[1].shape[0] = 8(n_lstm))
         #T.dot(x_t, self.W_xi)x_t=(sequence_length, batch_size ,n_in), W_xi=  [self.n_in, self.n_lstm]
 
         [h_vals, y_vals], _ = theano.scan(fn=step_lstm,

@@ -56,7 +56,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']=5000000
+       params['max_count']=50
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60

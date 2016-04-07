@@ -30,15 +30,15 @@ class HiddenLayer(object):
         self.params = [self.W, self.b]
 
 class ConvLayer(object):
-    def __init__(self, rng, input, nb_filter, nb_row, nb_col,input_shape,filter_shape,border_mode,subsample, activation=nn.relu):
+    def __init__(self, rng, input,filter_shape,input_shape,border_mode,subsample, activation=nn.relu):
         # e.g. input_shape= (samples, channels, rows, cols)
         #    assert border_mode in {'same', 'valid'}
 
         self.input = input
-        shape= (nb_filter, input_shape[1], nb_row, nb_col)
+        nb_filter=filter_shape[0]
 
         W,b=None,None
-        W =u.init_weight(shape,rng=rng, name="w_conv", sample='glorot')
+        W =u.init_weight(filter_shape,rng=rng, name="w_conv", sample='glorot')
         b=u.init_bias(nb_filter,rng=rng)
         self.W = W
         self.b = b
@@ -63,8 +63,8 @@ class ConvLayer(object):
         rows = input_shape[2]
         cols = input_shape[3]
 
-        rows = u.conv_output_length(rows, nb_row,border_mode, subsample[0])
-        cols = u.conv_output_length(cols, nb_col, border_mode, subsample[1])
+        rows = u.conv_output_length(rows, filter_shape[2],border_mode, subsample[0])
+        cols = u.conv_output_length(cols, filter_shape[3], border_mode, subsample[1])
 
         self.output_shape=(input_shape[0], nb_filter, rows, cols)
 
