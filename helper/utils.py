@@ -266,9 +266,9 @@ def log_read(mode,params):
                 sl=line.split("|")
                 for s in sl:
                     if "epoch" in s:
-                        epoch=int(s.strip().split(" ")[2])
+                        epoch=int(s.strip().split(" ")[2])*10
                     if "error" in s:
-                        error=float(s.strip().split(" ")[1])
+                        error=float(s.strip().split(' ')[1].replace(',',''))
                 list.append((epoch,error))
     #numpy.array([[epoch,error] for (epoch,error) in list_val])[:,1] #all error
     return list
@@ -296,7 +296,7 @@ def log_read_train(params):
                         error=float(s.strip().split(" ")[1])
                     if "minibatch" in s:
                         batch_index=int(s.strip().split(" ")[1].split("/")[0])
-                list.append((epoch,batch_index,error))
+                list.append((epoch,error))
     #numpy.array([[b, c, d] for (b, c, d) in list_val if b==1 ])[:,2] #first epoch all error
     return list
 
