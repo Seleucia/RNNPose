@@ -21,6 +21,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    F_list=[]
    G_list=[]
    (X_test,Y_test)= read_full_poseV2(data_dir,max_count,seq_length,sindex,istest)
+   print "Test set loaded"
    Y_test=Y_test/norm
    X_test=(X_test -min_tr) / (max_tr -min_tr)
    if only_test==1:
@@ -29,6 +30,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    istest=False
    get_flist=False
    X_train,Y_train=read_full_poseV2(data_dir,max_count,seq_length,sindex,istest)
+   print "Training set loaded and shuffle started"
    if params['shufle_data']==1:
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
 
@@ -36,6 +38,14 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    Y_train=Y_train/norm
    X_train=(X_train -min_tr) / (max_tr -min_tr)
+   print "Dataset Loading completed..."
+
+   if(params["model"]=="cnn"):
+       X_train=X_train.reshape(X_train.shape[0]*X_train.shape[1],X_train.shape[2])
+       Y_train=Y_train.reshape(Y_train.shape[0]*Y_train.shape[1],Y_train.shape[2])
+       X_test=X_test.reshape(X_test.shape[0]*X_test.shape[1],X_test.shape[2])
+       Y_test=Y_test.reshape(Y_test.shape[0]*Y_test.shape[1],Y_test.shape[2])
+
 
    return (X_train,Y_train,X_test,Y_test)
 
@@ -62,10 +72,10 @@ def read_full_poseV2(base_file,max_count,p_count,sindex,istest):
                 with open(fl) as f:
                     lines = f.readlines()
                     data=lines[1].strip().split(' ')
-                    y_d= [float(val) for val in data]
+                    y_d= [numpy.float32(val) for val in data]
 
                     data=lines[0].strip().split(' ')
-                    x_d= [float(val) for val in data]
+                    x_d= [numpy.float32(val) for val in data]
                     X_d.append(x_d)
                     Y_d.append(y_d)
                     if len(X_d)==p_count and p_count>0:
@@ -74,9 +84,9 @@ def read_full_poseV2(base_file,max_count,p_count,sindex,istest):
                         X_d=[]
                         Y_d=[]
                     if len(X_D)>=max_count:
-                        return (numpy.asarray(X_D),numpy.asarray(Y_D))
+                        return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32))
 
-    return (numpy.asarray(X_D),numpy.asarray(Y_D))
+    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32))
 
 
 def read_kinect_data(base_file,max_count,p_count,sindex):

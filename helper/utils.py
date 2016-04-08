@@ -158,15 +158,24 @@ def write_pred(est,bindex,G_list,params):
 
 def get_loss(gt,est):
     batch_size=gt.shape[0]
-    seq_length=gt.shape[1]
     loss=[]
-    for b in range(batch_size):
-        for s in range(seq_length):
-            diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3))*2 #13*3
+    if(len(gt.shape)==2):
+        for b in range(batch_size):
+            diff_vec=np.abs(gt[b].reshape(14,3) - est[b].reshape(14,3))*2 #13*3
             diff_vec=diff_vec[~np.any(np.isnan(diff_vec), axis=1)]
             sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
             loss.append(np.mean(sq_m))
-    loss=np.nanmean(loss)
+        loss=np.nanmean(loss)
+    else:
+        seq_length=gt.shape[1]
+        for b in range(batch_size):
+            for s in range(seq_length):
+                diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3))*2 #13*3
+                diff_vec=diff_vec[~np.any(np.isnan(diff_vec), axis=1)]
+                sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
+                loss.append(np.mean(sq_m))
+        loss=np.nanmean(loss)
+
     return (loss)
 
 def get_loss_bb(gt,est):

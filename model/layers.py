@@ -10,7 +10,7 @@ class LogisticRegression(object):
         self.W = u.init_weight(shape=shape,rng=rng,name='W_xif',sample='glorot')
         self.b=u.init_bias(n_out,rng=rng)
 
-        self.y_pred = T.tanh(T.dot(input, self.W) + self.b)
+        self.y_pred = T.dot(input, self.W) + self.b
         self.params = [self.W, self.b]
         self.input = input
 

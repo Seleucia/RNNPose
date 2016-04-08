@@ -8,6 +8,7 @@ from model.egd import egd
 from model.blstmnp import blstmnp
 from model.erd_pre import erd_pre
 from model.cnn_lstm import cnn_lstm
+from model.cnn import cnn
 from helper.optimizer import ClipRMSprop, RMSprop,Adam
 import helper.utils as u
 import theano
@@ -33,6 +34,8 @@ def get_model(params,rng):
         model = blstmnp(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="cnn_lstm"):
         model = cnn_lstm(rng=rng,params=params,optimizer=Adam)
+    elif(params["model"]=="cnn"):
+        model = cnn(rng=rng,params=params,optimizer=Adam)
     else:
         model=None
     return model

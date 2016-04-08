@@ -6,15 +6,15 @@ def get_params():
    global params
    params={}
    params['run_mode']=0 #0,full,1:resume, 2,X
-   params["rn_id"]="resume" #running id, model
-   params["notes"]="blanket lstm simple running" #running id
+   params["rn_id"]="comp" #running id, model
+   params["notes"]="CNN training" #running id
    params["model"]="cnn_lstm"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
-   params['mfile']= "cnn_lstm_normal_b_0.147931477267_best.p"
+   params['mfile']= "cnn_lstm_big_train_0.152191_best.p"
 
-   params['batch_size']=20
+   params['batch_size']=50
    params['shufle_data']=1
    params['max_count']= 10
 
@@ -25,8 +25,6 @@ def get_params():
    params['log_file']=wd+"/logs/"+params["model"]+"_"+params["rn_id"]+"_"+str(params['run_mode'])+"_"+utils.get_time()+".txt"
    params["model_file"]=wd+"/cp/"
    params["data_dir"]="/home/coskun/projects/data/old_blanket/"
-
-
 
    # early-stopping parameters
    params['patience']= 10000  # look as this many examples regardless
@@ -56,7 +54,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']=50
+       params['max_count']=500000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60
