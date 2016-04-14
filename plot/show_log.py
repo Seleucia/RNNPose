@@ -3,9 +3,9 @@ import helper.config as config
 import plot_data
 
 params=config.get_params()
-params["log_file"]="cnn_lstm_resume_0_18-12-44-121954.txt"
+params["log_file"]="cnn_comp_0_15-23-21-598839.txt"
 
-lim=300
+lim=100
 model="VAL"
 list_val=utils.log_read(model,params)
 plot_data.plot_val(list_val,params["wd"]+"/"+"logs/img/"+params["log_file"].replace(".txt",".png"),lim=lim)

@@ -5,14 +5,14 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=0 #0,full,1:resume, 2,X
-   params["rn_id"]="comp" #running id, model
-   params["notes"]="CNN training" #running id
-   params["model"]="cnn_lstm"#kccnr,dccnr
+   params['run_mode']=1 #0,full,1:resume, 2,X
+   params["rn_id"]="pretrained_cnn2_noTANH" #running id, model
+   params["notes"]="CNN pretrained NOtanh" #running id
+   params["model"]="cnn"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
-   params['mfile']= "cnn_lstm_big_train_0.152191_best.p"
+   params['mfile']= "cnn_comp_lr_0.123376_best.p"
 
    params['batch_size']=50
    params['shufle_data']=1
@@ -33,7 +33,7 @@ def get_params():
 
    # learning parameters
    params['momentum']=0.9    # the params for momentum
-   params['lr']=0.00001
+   params['lr']=0.0001
    params['learning_rate_decay']= 0.998
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600
@@ -54,7 +54,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']=500000
+       params['max_count']=2000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60

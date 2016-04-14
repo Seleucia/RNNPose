@@ -36,6 +36,9 @@ def conv_output_length(input_length, filter_size, border_mode, stride):
       #  'full' zero-pads image to multiple of filter shape to generate output
       #  of shape: image_shape + filter_shape - 1.
 
+def do_nothing(x):
+    return x
+
 def get_fans(shape):
     if len(shape) == 2:
         fan_in = shape[0]
@@ -378,10 +381,10 @@ def read_params(params):
 
 def set_params(model,mparams):
     counter=0
-    for p in mparams:
+    for p in mparams[0:-2]:
         model.params[counter].set_value(p)
-        if(counter<(len(mparams)-2)):
-                model.params[counter].set_value(p)
+        # if(counter<(len(mparams)-2)):
+        #         model.params[counter].set_value(p)
         # if(counter==(len(mparams)-1)):
         #     model.params[counter].set_value(p[0:39])
         # elif(counter==(len(mparams)-2)):

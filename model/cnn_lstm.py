@@ -4,7 +4,7 @@ import theano
 import theano.tensor as T
 from layers import ConvLayer,PoolLayer,HiddenLayer,DropoutLayer
 import theano.tensor.nnet as nn
-from helper.utils import init_weight,init_bias,get_err_fn,count_params
+from helper.utils import init_weight,init_bias,get_err_fn,count_params, do_nothing
 from helper.optimizer import RMSprop
 
 # theano.config.exception_verbosity="high"
@@ -56,7 +56,7 @@ class cnn_lstm(object):
         #Layer4: hidden
         n_in= reduce(lambda x, y: x*y, p3.output_shape[1:])
         x_flat = p3.output.flatten(2)
-        h1=HiddenLayer(rng,x_flat,n_in,1024)
+        h1=HiddenLayer(rng,x_flat,n_in,1024,activation=nn.relu)
         n_in=1024
         rnn_input = h1.output.reshape((batch_size,sequence_length, n_in))
 
@@ -87,7 +87,7 @@ class cnn_lstm(object):
            z_t = T.nnet.sigmoid(T.dot(x_t, self.W_xz) + T.dot(h_tm1, self.W_hz)  + self.b_z)
            h_t = T.tanh(T.dot(x_t, self.W_xh) + T.dot((r_t*h_tm1),self.W_hh)  + self.b_h)
            hh_t = z_t * h_t + (1-z_t)*h_tm1
-           y_t = T.tanh(T.dot(hh_t, self.W_hy) + self.b_y)
+           y_t = T.dot(hh_t, self.W_hy) + self.b_y
            return [hh_t, y_t]
 
 
@@ -103,7 +103,7 @@ class cnn_lstm(object):
 
         self.output = y_vals.dimshuffle(1,0,2)
 
-        self.params =self.params+c1.params+c2.params+c3.params+h1.params
+        self.params =c1.params+c2.params+c3.params+h1.params+self.params
 
         cost=get_err_fn(self,cost_function,Y)
         _optimizer = optimizer(cost, self.params, lr=lr)

@@ -25,6 +25,7 @@ def train_rnn(params):
    u.log_write("Model build started",params)
    if params['run_mode']==1:
       model= model_provider.get_model_pretrained(params,rng)
+      u.log_write("Pretrained loaded: %s"%(params['mfile']),params)
    else:
      model= model_provider.get_model(params,rng)
    u.log_write("Number of parameters: %s"%(model.n_param),params)
@@ -67,7 +68,7 @@ def train_rnn(params):
           batch_loss3d=np.nanmean(batch_loss3d)
           if(batch_loss3d<best_loss):
              best_loss=batch_loss3d
-             ext=str(batch_loss3d)+"_best.p"
+             ext=str(epoch_counter)+"_"+str(batch_loss3d)+"_best.p"
              u.write_params(model.params,params,ext)
           else:
               ext=str(val_counter%2)+".p"

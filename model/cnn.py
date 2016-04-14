@@ -4,7 +4,7 @@ import theano
 import theano.tensor as T
 from layers import ConvLayer,PoolLayer,HiddenLayer,DropoutLayer, LogisticRegression
 import theano.tensor.nnet as nn
-from helper.utils import init_weight,init_bias,get_err_fn,count_params
+from helper.utils import init_weight,init_bias,get_err_fn,count_params, do_nothing
 from helper.optimizer import RMSprop
 
 # theano.config.exception_verbosity="high"
@@ -53,7 +53,9 @@ class cnn(object):
         #Layer4: hidden
         n_in= reduce(lambda x, y: x*y, p3.output_shape[1:])
         x_flat = p3.output.flatten(2)
+
         h1=HiddenLayer(rng,x_flat,n_in,1024,activation=nn.relu)
+
 
         #Layer4: hidden
         lreg=LogisticRegression(rng,h1.output,1024,42)
