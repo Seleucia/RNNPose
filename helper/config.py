@@ -5,7 +5,7 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=1 #0,full,1:resume, 2,X
+   params['run_mode']=0 #0,full,1:resume, 2,X
    params["rn_id"]="pretrained_cnn2_noTANH" #running id, model
    params["notes"]="CNN pretrained NOtanh" #running id
    params["model"]="cnn"#kccnr,dccnr
@@ -54,7 +54,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']=2000000
+       params['max_count']=5000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60

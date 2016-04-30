@@ -24,11 +24,13 @@ def numpy_floatX(data):
 def conv_output_length(input_length, filter_size, border_mode, stride):
     if input_length is None:
         return None
-    assert border_mode in {'full', 'valid'}
+    assert border_mode in {'full', 'valid','same'}
     if border_mode == 'full':
         output_length = input_length++ filter_size-1
     elif border_mode == 'valid':
         output_length = input_length - filter_size + 1
+    elif border_mode == 'same':
+        output_length = input_length
     return (output_length + stride - 1) // stride
 
       # 'valid'only apply filter to complete patches of the image. Generates
@@ -55,7 +57,7 @@ def get_fans(shape):
         fan_out = np.sqrt(np.prod(shape))
     return fan_in, fan_out
 
-def init_bias(n_out,rng, sample='zero'):
+def init_bias(n_out,rng, sample='zero',name='b'):
     if sample == 'zero':
         b = np.zeros((n_out,), dtype=dtype)
     elif sample == 'one':
@@ -67,7 +69,7 @@ def init_bias(n_out,rng, sample='zero'):
     else:
         raise ValueError("Unsupported initialization scheme: %s"
                          % sample)
-    b = theano.shared(value=b, name='b')
+    b = theano.shared(value=b, name=name)
     return b
 
 def init_weight(shape, rng,name, sample='glorot', seed=None):

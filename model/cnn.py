@@ -25,12 +25,12 @@ class cnn(object):
         #CNN global parameters.
         subsample=(1,1)
         p_1=0.5
-        border_mode="valid"
+        border_mode="same"
         cnn_batch_size=batch_size
         pool_size=(2,2)
 
         #Layer1: conv2+pool+drop
-        filter_shape=(64,1,9,9)
+        filter_shape=(64,1,10,10)
         input_shape=(cnn_batch_size,1,120,60) #input_shape= (samples, channels, rows, cols)
         input= X.reshape(input_shape)
         c1=ConvLayer(rng, input,filter_shape, input_shape,border_mode,subsample, activation=nn.relu)
