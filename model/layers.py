@@ -2,6 +2,7 @@ import helper.utils as u
 import theano.tensor.signal.pool as pool
 import theano.tensor.nnet as nn
 import theano.tensor as T
+from helper.utils import init_weight,init_bias,get_err_fn
 from theano.tensor.nnet import conv2d #Check if it is using gpu or not
 
 class LogisticRegression(object):
@@ -29,7 +30,7 @@ class HiddenLayer(object):
         # parameters of the model
         self.params = [self.W, self.b]
 
-class LSTMLayer(object):
+class CLSTMLayer(object):
     def __init__(self, rng,layer_id,p_dict,f_dict,s_dict,x_t,h_tm1,c_tm1,border_mode,subsample):
         layer_id=str(layer_id)
 
@@ -55,6 +56,41 @@ class LSTMLayer(object):
         y_t =h_t
         self.yt_shape=x_i_t.output_shape
         self.output=[h_t,c_t,y_t]
+
+class LSTMLayer(object):
+    def __init__(self, rng, layer_id, n_in, n_lstm):
+       layer_id=str(layer_id)
+       self.n_in = n_in
+       self.n_lstm = n_lstm
+       self.W_xi = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xi_'+layer_id,sample= 'glorot')
+       self.W_hi = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_hi_'+layer_id, sample='glorot')
+       self.W_ci = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_ci_'+layer_id,sample= 'glorot')
+       self.b_i  = init_bias(self.n_lstm,rng=rng, sample='zero',name='b_i_'+layer_id)
+       self.W_xf = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xf_'+layer_id,sample= 'glorot')
+       self.W_hf = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_hf_'+layer_id,sample= 'glorot')
+       self.W_cf = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_cf_'+layer_id, sample='glorot')
+       self.b_f = init_bias(self.n_lstm, rng=rng,sample='one',name='b_f_'+layer_id)
+       self.W_xc = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xc_'+layer_id, sample='glorot')
+       self.W_hc = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_hc_'+layer_id, sample='ortho')
+       self.b_c = init_bias(self.n_lstm, rng=rng,sample='zero',name='b_c_'+layer_id)
+       self.W_xo = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xo_'+layer_id,sample= 'glorot')
+       self.W_ho = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_ho_'+layer_id, sample='glorot')
+       self.W_co = init_weight((self.n_lstm, self.n_lstm),rng=rng,name='W_co_'+layer_id,sample= 'glorot')
+       self.b_o = init_bias(self.n_lstm,rng=rng, sample='zero',name='b_o_'+layer_id)
+
+       self.params = [self.W_xi, self.W_hi, self.W_ci, self.b_i,
+                      self.W_xf, self.W_hf, self.W_cf, self.b_f,
+                      self.W_xc, self.W_hc, self.b_c,  self.W_xo,
+                      self.W_ho, self.W_co, self.b_o]
+
+    def run(self,x_t,h_tm1,c_tm1):
+        i_t = T.nnet.sigmoid(T.dot(x_t, self.W_xi) + T.dot(h_tm1, self.W_hi) + T.dot(c_tm1,self.W_ci) + self.b_i)
+        f_t = T.nnet.sigmoid(T.dot(x_t, self.W_xf) + T.dot(h_tm1, self.W_hf) + T.dot(c_tm1, self.W_cf) + self.b_f)
+        c_t = f_t * c_tm1 + i_t * T.tanh(T.dot(x_t, self.W_xc) + T.dot(h_tm1, self.W_hc) + self.b_c)
+        o_t = T.nnet.sigmoid(T.dot(x_t, self.W_xo)+ T.dot(h_tm1, self.W_ho) + T.dot(c_t,self.W_co)  + self.b_o)
+        h_t = o_t * T.tanh(c_t)
+        y_t = h_t
+        return [h_t,c_t,y_t]
 
 
 class ConvLayer(object):

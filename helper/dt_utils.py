@@ -8,6 +8,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
+   dataset_reader=read_full_poseV2 #read_full_poseV2,load_full_pose
    # min_tr=0.000000
    # max_tr=8.190918
    # norm=2#numpy.linalg.norm(X_test)
@@ -20,7 +21,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    get_flist=False
    F_list=[]
    G_list=[]
-   (X_test,Y_test)= read_full_poseV2(data_dir,max_count,seq_length,sindex,istest)
+   (X_test,Y_test,F_list,G_list)= dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
    print "Test set loaded"
    Y_test=Y_test/norm
    X_test=(X_test -min_tr) / (max_tr -min_tr)
@@ -29,7 +30,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    istest=False
    get_flist=False
-   X_train,Y_train=read_full_poseV2(data_dir,max_count,seq_length,sindex,istest)
+   X_train,Y_train,F_list,G_list=dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
    print "Training set loaded and shuffle started"
    if params['shufle_data']==1:
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
@@ -50,7 +51,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    return (X_train,Y_train,X_test,Y_test)
 
 
-def read_full_poseV2(base_file,max_count,p_count,sindex,istest):
+def read_full_poseV2(base_file,max_count,p_count,sindex,istest,get_flist=False):
     if istest==0:
         lst_act=['felix','julia','ashley','dario','severine','huseyin','mona','philipp']
         lst_sq=['bodycalib','sleep','movementsh','getup','bodycalib','eatsO','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
@@ -59,6 +60,8 @@ def read_full_poseV2(base_file,max_count,p_count,sindex,istest):
         lst_sq=['bodycalib','sleep','movementsh','getup','bodycalib','eatsO','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
     X_D=[]
     Y_D=[]
+    F_L=[]
+    G_L=[]
     for actor in lst_act:
         for sq in lst_sq:
             X_d=[]
@@ -78,16 +81,18 @@ def read_full_poseV2(base_file,max_count,p_count,sindex,istest):
                     x_d= [numpy.float32(val) for val in data]
                     X_d.append(x_d)
                     Y_d.append(y_d)
+                    if(get_flist):
+                        F_L.append(fl)
+                        G_L.append(fl)
                     if len(X_d)==p_count and p_count>0:
                         X_D.append(X_d)
                         Y_D.append(Y_d)
                         X_d=[]
                         Y_d=[]
                     if len(X_D)>=max_count:
-                        return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32))
+                        return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L)
 
-    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32))
-
+    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L)
 
 def read_kinect_data(base_file,max_count,p_count,sindex):
     mat = h5py.File(base_file,mode='r',driver='core')
@@ -144,7 +149,7 @@ def read_kinect_data(base_file,max_count,p_count,sindex):
 
     return (numpy.asarray(X_D_train),numpy.asarray(Y_D_train),numpy.asarray(X_D_test),numpy.asarray(Y_D_test))
 
-def load_full_pose(base_file,max_count,istest,get_flist,p_count,sindex):
+def load_full_pose(base_file,max_count,p_count,sindex,istest,get_flist=False):
     if(istest):
         base_file=base_file+"test/test.txt"
     else:

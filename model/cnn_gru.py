@@ -2,7 +2,7 @@ from theano import shared
 import numpy as np
 import theano
 import theano.tensor as T
-from layers import ConvLayer,PoolLayer,HiddenLayer,DropoutLayer,LSTMLayer
+from layers import ConvLayer,PoolLayer,HiddenLayer,DropoutLayer
 import theano.tensor.nnet as nn
 from helper.utils import init_weight,init_bias,get_err_fn,count_params, do_nothing
 from helper.optimizer import RMSprop
@@ -10,7 +10,7 @@ from helper.optimizer import RMSprop
 # theano.config.exception_verbosity="high"
 dtype = T.config.floatX
 
-class cnn_lstm(object):
+class cnn_gru(object):
     def __init__(self,rng,params,cost_function='mse',optimizer = RMSprop):
 
         lr=params["lr"]
@@ -37,7 +37,7 @@ class cnn_lstm(object):
         input= X.reshape(input_shape)
         c1=ConvLayer(rng, input,filter_shape, input_shape,border_mode,subsample, activation=nn.relu)
         p1=PoolLayer(c1.output,pool_size=pool_size,input_shape=c1.output_shape)
-        dl1=DropoutLayer(rng,input=p1.output,prob=p_1,is_train=is_train)
+        dl1=DropoutLayer(rng,input=p1.output,prob=p_1)
         retain_prob = 1. - p_1
         test_output = p1.output*retain_prob
         d1_output = T.switch(T.neq(is_train, 0), dl1.output, test_output)
@@ -65,43 +65,41 @@ class cnn_lstm(object):
         self.n_in = n_in
         self.n_lstm = n_lstm
         self.n_out = n_out
+        self.W_xr = init_weight((self.n_in, self.n_lstm),rng=rng,name='W_xi',sample= 'glorot')
+        self.W_hr = init_weight((self.n_lstm, self.n_lstm),rng=rng,  name='W_hr', sample='glorot')
+        self.b_r  = init_bias(self.n_lstm,rng=rng, sample='zero')
+        self.W_xz = init_weight((self.n_in, self.n_lstm), rng=rng, name='W_xz', sample='glorot')
+        self.W_hz = init_weight((self.n_lstm, self.n_lstm), rng=rng, name='W_hz', sample='glorot')
+        self.b_z = init_bias(self.n_lstm,rng=rng, sample='zero')
+        self.W_xh = init_weight((self.n_in, self.n_lstm), rng=rng, name='W_xh', sample='glorot')
+        self.W_hh = init_weight((self.n_lstm, self.n_lstm), rng=rng, name='W_hh',sample= 'glorot')
+        self.b_h = init_bias(self.n_lstm,rng=rng, sample='zero')
         self.W_hy = init_weight((self.n_lstm, self.n_out), rng=rng,name='W_hy', sample= 'glorot')
         self.b_y = init_bias(self.n_out,rng=rng, sample='zero')
 
-        layer1=LSTMLayer(rng,0,self.n_in,self.n_lstm)
-        layer2=LSTMLayer(rng,1,self.n_lstm,self.n_lstm)
-        layer3=LSTMLayer(rng,2,self.n_lstm,self.n_lstm)
+        self.params = [self.W_xr, self.W_hr, self.b_r,
+                      self.W_xz, self.W_hz, self.b_z,
+                      self.W_xh, self.W_hh, self.b_h,
+                      self.W_hy, self.b_y]
 
-        self.params = layer1.params+layer2.params+layer3.params
-        self.params.append(self.W_hy)
-        self.params.append(self.b_y)
+        def step_lstm(x_t, h_tm1):
+           r_t = T.nnet.sigmoid(T.dot(x_t, self.W_xr) + T.dot(h_tm1, self.W_hr) + self.b_r)
+           z_t = T.nnet.sigmoid(T.dot(x_t, self.W_xz) + T.dot(h_tm1, self.W_hz)  + self.b_z)
+           h_t = T.tanh(T.dot(x_t, self.W_xh) + T.dot((r_t*h_tm1),self.W_hh)  + self.b_h)
+           hh_t = z_t * h_t + (1-z_t)*h_tm1
+           y_t = T.dot(hh_t, self.W_hy) + self.b_y
+           return [hh_t, y_t]
 
-        def step_lstm(x_t,mask,h_tm1_1,c_tm1_1,h_tm1_2,c_tm1_2,h_tm1_3,c_tm1_3):
-           [h_t_1,c_t_1,y_t_1]=layer1.run(x_t,h_tm1_1,c_tm1_1)
-           dl1=DropoutLayer(rng,input=y_t_1,prob=0.5,is_train=is_train,mask=mask)
-           [h_t_2,c_t_2,y_t_2]=layer2.run(dl1.output,h_tm1_2,c_tm1_2)
-           [h_t_3,c_t_3,y_t_3]=layer3.run(y_t_2,h_tm1_3,c_tm1_3)
-           y = T.dot(y_t_3, self.W_hy) + self.b_y
-           return [h_t_1,c_t_1,h_t_2,c_t_2,h_t_3,c_t_3,y]
 
-        h0_1 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
-        c0_1 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
-        h0_2 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
-        c0_2 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
-        h0_3 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
-        c0_3 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
-
-        mask_shape=(sequence_length,batch_size,self.n_lstm)
-        p_1=0.5
-        mask= rng.binomial(size=mask_shape, p=p_1, dtype=X.dtype)
+        h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
 
         #(1, 0, 2) -> AxBxC to BxAxC
         #(batch_size,sequence_length, n_in) >> (sequence_length, batch_size ,n_in)
         #T.dot(x_t, self.W_xi)x_t=(sequence_length, batch_size ,n_in), W_xi=  [self.n_in, self.n_lstm]
 
-        [h_t_1,c_t_1,h_t_2,c_t_2,h_t_3,c_t_3,y_vals], _ = theano.scan(fn=step_lstm,
-                                         sequences=[rnn_input.dimshuffle(1,0,2),mask],
-                                         outputs_info=[h0_1, c0_1,h0_2, c0_2, h0_3, c0_3, None])
+        [h_vals, y_vals], _ = theano.scan(fn=step_lstm,
+                                         sequences=rnn_input.dimshuffle(1,0,2),
+                                         outputs_info=[h0, None])
 
         self.output = y_vals.dimshuffle(1,0,2)
 

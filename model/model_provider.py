@@ -1,7 +1,6 @@
 from model.lstm import  lstm
-from model.lstmnp import  lstmnp
+from model.cnn_lstm_s import  cnn_lstm_s
 from model.lstm2erd import lstm2erd
-from model.lstm2 import lstm2
 from model.erd import erd
 from model.gru import gru
 from model.egd import egd
@@ -16,11 +15,9 @@ import theano
 
 def get_model(params,rng):
     if(params["model"]=="lstm"):
-        model = lstm(rng,n_in=1024, n_lstm= params['n_hidden'],n_out= params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
-    elif(params["model"]=="lstmnp"):
-        model = lstmnp(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
-    elif(params["model"]=="lstm2"):
-        model = lstm2(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
+        model = lstm(rng,params, optimizer=Adam)
+    elif(params["model"]=="cnn_lstm_s"):
+        model = cnn_lstm_s(rng,params, optimizer=Adam)
     elif(params["model"]=="erd"):
         model = erd(1024, params['n_hidden'], params['n_output'],batch_size=params['batch_size'],lr=params['lr'], optimizer=Adam)
     elif(params["model"]=="erd_pre"):

@@ -3,7 +3,7 @@ from theano import shared
 import numpy as np
 import theano
 import theano.tensor as T
-from layers import LogisticRegression,PoolLayer,HiddenLayer,DropoutLayer,LSTMLayer
+from layers import LogisticRegression,PoolLayer,HiddenLayer,DropoutLayer,CLSTMLayer
 import theano.tensor.nnet as nn
 from helper.utils import init_weight,init_bias,get_err_fn,count_params, do_nothing
 from helper.optimizer import RMSprop
@@ -106,16 +106,16 @@ class real_rcnn(object):
 
         def step_lstm(x_t,mask,h_tm1_1,c_tm1_1,h_tm1_2,c_tm1_2,h_tm1_3,c_tm1_3):
            p1=PoolLayer(x_t,pool_size=pool_size,input_shape=s_dict["i_shape_0"])
-           layer_1=LSTMLayer(rng,0,p_dict,f_dict,s_dict, p1.output,h_tm1_1,c_tm1_1,border_mode,subsample)
+           layer_1=CLSTMLayer(rng,0,p_dict,f_dict,s_dict, p1.output,h_tm1_1,c_tm1_1,border_mode,subsample)
            [h_t_1,c_t_1,y_t_1]=layer_1.output
            p2=PoolLayer(y_t_1,pool_size=pool_size,input_shape=layer_1.yt_shape)
            dl1=DropoutLayer(rng,input=p2.output,prob=p_1,is_train=is_train,mask=mask)
 
-           layer_2=LSTMLayer(rng,1,p_dict,f_dict,s_dict, dl1.output,h_tm1_2,c_tm1_2,border_mode,subsample)
+           layer_2=CLSTMLayer(rng,1,p_dict,f_dict,s_dict, dl1.output,h_tm1_2,c_tm1_2,border_mode,subsample)
            [h_t_2,c_t_2,y_t_2]=layer_2.output
            p2=PoolLayer(y_t_2,pool_size=pool_size,input_shape=layer_1.yt_shape)
 
-           layer_3=LSTMLayer(rng,2,p_dict,f_dict,s_dict, p2.output,h_tm1_3,c_tm1_3,border_mode,subsample)
+           layer_3=CLSTMLayer(rng,2,p_dict,f_dict,s_dict, p2.output,h_tm1_3,c_tm1_3,border_mode,subsample)
            [h_t_3,c_t_3,y_t_3]=layer_3.output
            p3=PoolLayer(y_t_3,pool_size=pool_size,input_shape=layer_3.yt_shape)
 
