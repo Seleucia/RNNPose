@@ -184,7 +184,7 @@ def get_loss(gt,est):
     return (loss)
 
 def get_loss_bb(gt,est):
-    sf="/home/coskun/PycharmProjects/RNNPose21/data/blanket.txt"
+    sf="/home/coskun/PycharmProjects/RNNPoseV2/pred/cnn_lstm_s/blanket.txt"
     batch_size=gt.shape[0]
     seq_length=gt.shape[1]
     loss=0
@@ -196,12 +196,15 @@ def get_loss_bb(gt,est):
             seq_los=[0]*seq_length
             for s in range(seq_length):
                 diff_vec=np.abs(gt[b][s].reshape(14,3) - est[b][s].reshape(14,3))*2 #14,3
-                val=np.sqrt(np.sum(diff_vec**2,axis=1))
-                for i in range(14):
-                    f=val[i]
-                    f_handle.write("%f"%(f))
-                    if(i<13):
-                        f_handle.write(";")
+                for val in est[b][s]:
+                    f_handle.write("%f "%(val))
+                # val=np.sqrt(np.sum(diff_vec**2,axis=1))
+                #
+                # for i in range(14):
+                #     f=val[i]
+                #     f_handle.write("%f"%(f))
+                #     if(i<13):
+                #         f_handle.write(";")
                 f_handle.write('\n')
                 b_l=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
                 loss_list.append(b_l)
@@ -383,7 +386,8 @@ def read_params(params):
 
 def set_params(model,mparams):
     counter=0
-    for p in mparams[0:-2]:
+    # for p in mparams[0:-2]:
+    for p in mparams:
         model.params[counter].set_value(p)
         # if(counter<(len(mparams)-2)):
         #         model.params[counter].set_value(p)

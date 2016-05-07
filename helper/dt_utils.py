@@ -54,10 +54,13 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 def read_full_poseV2(base_file,max_count,p_count,sindex,istest,get_flist=False):
     if istest==0:
         lst_act=['felix','julia','ashley','dario','severine','huseyin','mona','philipp']
-        lst_sq=['bodycalib','sleep','movementsh','getup','bodycalib','eatsO','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
+        lst_sq=['bodycalib','movementsh','eatso','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
     else:
         lst_act=['leslie','meng']
-        lst_sq=['bodycalib','sleep','movementsh','getup','bodycalib','eatsO','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
+        #severine_eatso_1622
+        lst_sq=['bodycalib','movementsh','eatso','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
+        # lst_sq=['movementsh']
+        # lst_act=['meng']
     X_D=[]
     Y_D=[]
     F_L=[]

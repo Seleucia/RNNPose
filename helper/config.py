@@ -5,14 +5,14 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=1 #0,full,1:resume, 2,X
-   params["rn_id"]="pretrained_3layer" #running id, model
-   params["notes"]="CNN pretrained, 3layer lstm with dropout 0.5" #running id
-   params["model"]="lstm"#kccnr,dccnr
+   params['run_mode']=0 #0,full,1:resume, 2,X
+   params["rn_id"]="real_cnn_highbias" #running id, model
+   params["notes"]="real rcnn started with high bias values." #running id
+   params["model"]="real_rcnn"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 20
    params['validate']= 1
-   params['mfile']= "cnn_comp_lr_0.123376_best.p"
+   params['mfile']= "xxx.p"
 
    params['batch_size']=50
    params['shufle_data']=1

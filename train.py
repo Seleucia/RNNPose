@@ -32,7 +32,7 @@ def train_rnn(params):
    train_errors = np.ndarray(nb_epochs)
    u.log_write("Training started",params)
    val_counter=0
-   best_loss=10000
+   best_loss=0.123376
    for epoch_counter in range(nb_epochs):
       batch_loss = 0.
       for minibatch_index in range(n_train_batches):

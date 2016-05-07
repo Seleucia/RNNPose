@@ -92,7 +92,7 @@ class real_rcnn(object):
             p_dict['W_xf_'+s_index] =u.init_weight(f_dict['filter_shape_'+s_index],rng=rng, name="W_xf_"+s_index, sample='glorot')
             p_dict['W_hf_'+s_index] = u.init_weight(f_dict['s_filter_shape_'+s_index],rng=rng, name="W_hf_"+s_index, sample='glorot')
             p_dict['W_cf_'+s_index] = u.init_weight(f_dict['s_filter_shape_'+s_index],rng=rng, name="W_cf_"+s_index, sample='glorot')
-            p_dict['b_f_'+s_index]=u.init_bias(f_dict['filter_shape_'+s_index][0],rng=rng,name="b_f_"+s_index)
+            p_dict['b_f_'+s_index]=u.init_bias(f_dict['filter_shape_'+s_index][0],rng=rng,name="b_f_"+s_index,sample='one')
 
             p_dict['W_xc_'+s_index] =u.init_weight(f_dict['filter_shape_'+s_index],rng=rng, name="W_xc_"+s_index, sample='glorot')
             p_dict['W_hc_'+s_index] = u.init_weight(f_dict['s_filter_shape_'+s_index],rng=rng, name="W_hc_"+s_index, sample='glorot')
