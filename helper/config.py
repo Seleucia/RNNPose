@@ -10,11 +10,11 @@ def get_params():
    params["notes"]="real rcnn started with high bias values." #running id
    params["model"]="real_rcnn"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
-   params['seq_length']= 20
+   params['seq_length']= 10
    params['validate']= 1
    params['mfile']= "xxx.p"
 
-   params['batch_size']=50
+   params['batch_size']=5
    params['shufle_data']=1
    params['max_count']= 10
 
@@ -54,7 +54,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']=50000000
+       params['max_count']=50
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60

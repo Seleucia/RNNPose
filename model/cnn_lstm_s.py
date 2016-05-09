@@ -79,8 +79,13 @@ class cnn_lstm_s(object):
            y = T.dot(y_t, self.W_hy) + self.b_y
            return [h_t,c_t,y]
 
-        h0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
-        c0 = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
+        reset = T.iscalar('reset') # pseudo boolean for switching between training and prediction
+        H = T.matrix(name="H",dtype=dtype) # initial hidden state
+        C = T.matrix(name="C",dtype=dtype) # initial hidden state
+        # h_ = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
+        # c_ = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
+        h0=H
+        c0=C
 
         #(1, 0, 2) -> AxBxC to BxAxC
         #(batch_size,sequence_length, n_in) >> (sequence_length, batch_size ,n_in)
@@ -102,6 +107,6 @@ class cnn_lstm_s(object):
 
         cost += L2_reg*L2_sqr
         _optimizer = optimizer(cost, self.params, lr=lr)
-        self.train = theano.function(inputs=[X,Y,is_train],outputs=cost,updates=_optimizer.getUpdates(),allow_input_downcast=True)
-        self.predictions = theano.function(inputs = [X,is_train], outputs = self.output,allow_input_downcast=True)
+        self.train = theano.function(inputs=[X,Y,is_train,H,C],outputs=[cost,h_t[-1],c_t[-1]],updates=_optimizer.getUpdates(),allow_input_downcast=True)
+        self.predictions = theano.function(inputs = [X,is_train,H,C], outputs = self.output,allow_input_downcast=True)
         self.n_param=count_params(self.params)

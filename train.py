@@ -1,4 +1,7 @@
 import numpy as np
+from theano import shared
+import theano.tensor as T
+dtype = T.config.floatX
 import argparse
 import helper.config as config
 import model.model_provider as model_provider
@@ -35,6 +38,8 @@ def train_rnn(params):
    best_loss=0.123376
    for epoch_counter in range(nb_epochs):
       batch_loss = 0.
+      H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # initial hidden state
+      reset=1
       for minibatch_index in range(n_train_batches):
           x=X_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
           y=Y_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size]#60*20*54
@@ -43,7 +48,11 @@ def train_rnn(params):
              x_b=np.asarray(map(np.flipud,x))
              loss = model.train(x,x_b,y)
           else:
-             loss = model.train(x, y,is_train)
+             print "Batch train started."
+             loss,H,C= model.train(x, y,is_train,H,C)
+             reset=0
+             print "Batch train ended."
+             print H
           batch_loss += loss
       if params['shufle_data']==1:
          X_train,Y_train=du.shuffle_in_unison_inplace(X_train,Y_train)
