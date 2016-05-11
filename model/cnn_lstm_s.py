@@ -84,8 +84,6 @@ class cnn_lstm_s(object):
         C = T.matrix(name="C",dtype=dtype) # initial hidden state
         # h_ = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
         # c_ = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
-        h0=H
-        c0=C
 
         #(1, 0, 2) -> AxBxC to BxAxC
         #(batch_size,sequence_length, n_in) >> (sequence_length, batch_size ,n_in)
@@ -93,7 +91,7 @@ class cnn_lstm_s(object):
 
         [h_t,c_t,y_vals], _ = theano.scan(fn=step_lstm,
                                          sequences=[rnn_input.dimshuffle(1,0,2)],
-                                         outputs_info=[h0, c0, None])
+                                         outputs_info=[H, C, None])
 
         self.output = y_vals.dimshuffle(1,0,2)
 
@@ -108,5 +106,5 @@ class cnn_lstm_s(object):
         cost += L2_reg*L2_sqr
         _optimizer = optimizer(cost, self.params, lr=lr)
         self.train = theano.function(inputs=[X,Y,is_train,H,C],outputs=[cost,h_t[-1],c_t[-1]],updates=_optimizer.getUpdates(),allow_input_downcast=True)
-        self.predictions = theano.function(inputs = [X,is_train,H,C], outputs = self.output,allow_input_downcast=True)
+        self.predictions = theano.function(inputs = [X,is_train,H,C], outputs = [self.output,h_t[-1],c_t[-1]],allow_input_downcast=True)
         self.n_param=count_params(self.params)

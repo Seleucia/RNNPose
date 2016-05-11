@@ -3,12 +3,14 @@ import struct
 import os
 import numpy
 import h5py
+import collections
+
 
 def load_pose(params,only_test=0,only_pose=1,sindex=0):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
-   dataset_reader=read_full_poseV2 #read_full_poseV2,load_full_pose
+   dataset_reader=read_full_poseV3 #read_full_poseV2,load_full_pose
    # min_tr=0.000000
    # max_tr=8.190918
    # norm=2#numpy.linalg.norm(X_test)
@@ -21,7 +23,8 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    get_flist=False
    F_list=[]
    G_list=[]
-   (X_test,Y_test,F_list,G_list)= dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
+   S_Test_list=[]
+   (X_test,Y_test,F_list,G_list,S_Test_list)= dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
    print "Test set loaded"
    Y_test=Y_test/norm
    X_test=(X_test -min_tr) / (max_tr -min_tr)
@@ -30,7 +33,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    istest=False
    get_flist=False
-   X_train,Y_train,F_list,G_list=dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
+   X_train,Y_train,F_list,G_list,S_Train_list=dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
    print "Training set loaded and shuffle started"
    if params['shufle_data']==1:
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
@@ -48,8 +51,58 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
        Y_test=Y_test.reshape(Y_test.shape[0]*Y_test.shape[1],Y_test.shape[2])
 
 
-   return (X_train,Y_train,X_test,Y_test)
+   return (X_train,Y_train,S_Train_list,X_test,Y_test,S_Test_list)
 
+
+def read_full_poseV3(base_file,max_count,p_count,sindex,istest,get_flist=False):
+    if istest==0:
+        lst_act=['felix','julia','ashley','dario','severine','huseyin','mona','philipp']
+        lst_sq=['bodycalib','movementsh','eatso','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
+    else:
+        lst_act=['leslie','meng']
+        #severine_eatso_1622
+        lst_sq=['bodycalib','movementsh','eatso','eats','reads','sleeps','objectss','sleeph','getuph','getinbedh']
+        # lst_sq=['movementsh']
+        # lst_act=['meng']
+    X_D=[]
+    Y_D=[]
+    F_L=[]
+    G_L=[]
+    S_L=[]
+    seq_id=0
+    for actor in lst_act:
+        for sq in lst_sq:
+            X_d=[]
+            Y_d=[]
+            seq_id+=1
+            for id in range(1,1801):
+                fl=base_file+actor+"_"+str(sq)+"_"+str(id)+".txt"
+                if not os.path.isfile(fl):
+                    if id==1:
+                        break;
+                    continue
+                with open(fl) as f:
+                    lines = f.readlines()
+                    data=lines[1].strip().split(' ')
+                    y_d= [numpy.float32(val) for val in data]
+
+                    data=lines[0].strip().split(' ')
+                    x_d= [numpy.float32(val) for val in data]
+                    X_d.append(x_d)
+                    Y_d.append(y_d)
+                    if(get_flist):
+                        F_L.append(fl)
+                        G_L.append(fl)
+                    if len(X_d)==p_count and p_count>0:
+                        X_D.append(X_d)
+                        Y_D.append(Y_d)
+                        S_L.append(seq_id)
+                        X_d=[]
+                        Y_d=[]
+                    if len(X_D)>=max_count:
+                        return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
 
 def read_full_poseV2(base_file,max_count,p_count,sindex,istest,get_flist=False):
     if istest==0:
@@ -475,6 +528,50 @@ def load_test_bboxes(params,max_count):
                        x_d=((numpy.abs(numpy.asarray(x_d).reshape(3,2)[:,0].T- numpy.asarray(x_d).reshape(3,2)[:,1].T))/10)
                        X_d.append(x_d)
    return (numpy.asarray(X_d))
+
+
+def get_batch_indexes(params,S_list):
+   batch_size=params['batch_size']
+   SID_List=[]
+   index_list=[]
+   counter=collections.Counter(S_list)
+   grb_count=counter.values()
+   last_index=0;
+   s_id=0
+   for mx in grb_count:
+       tmp_list=range(mx)
+       residual=mx%batch_size
+       r=tmp_list[-1]
+       #residual=0
+       if residual>0:
+           residual=batch_size-residual
+           tmp_list.extend(numpy.repeat(r,residual))
+       n_batches = len(tmp_list)
+       n_batches /= batch_size
+       SID_List.extend(numpy.repeat(s_id,len(tmp_list)))
+       s_id+=1
+       for n in range(0,n_batches,batch_size):
+           for starter in range(batch_size):
+               l=range(starter,mx,batch_size)
+               r=l[-1]
+               if residual>0:
+                   residual=batch_size-residual
+                   l.extend(numpy.repeat(r,residual))
+               l = [x+last_index for x in l]
+               index_list.extend(l[n:(n + batch_size)])
+       last_index+=mx
+
+
+   return (index_list,SID_List)
+
+
+
+
+
+
+
+   return glob.glob("/home/adam/*.txt")
+
 
 def get_folder_name_list(params):
    data_dir=params["data_dir"]
