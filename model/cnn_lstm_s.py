@@ -38,13 +38,10 @@ class cnn_lstm_s(object):
         c1=ConvLayer(rng, input,filter_shape, input_shape,border_mode,subsample, activation=nn.relu)
         p1=PoolLayer(c1.output,pool_size=pool_size,input_shape=c1.output_shape)
         dl1=DropoutLayer(rng,input=p1.output,prob=p_1,is_train=is_train)
-        retain_prob = 1. - p_1
-        test_output = p1.output*retain_prob
-        d1_output = T.switch(T.neq(is_train, 0), dl1.output, test_output)
 
         #Layer2: conv2+pool
         filter_shape=(128,p1.output_shape[1],3,3)
-        c2=ConvLayer(rng, d1_output, filter_shape,p1.output_shape,border_mode,subsample, activation=nn.relu)
+        c2=ConvLayer(rng, dl1.output, filter_shape,p1.output_shape,border_mode,subsample, activation=nn.relu)
         p2=PoolLayer(c2.output,pool_size=pool_size,input_shape=c2.output_shape)
 
 
@@ -79,11 +76,8 @@ class cnn_lstm_s(object):
            y = T.dot(y_t, self.W_hy) + self.b_y
            return [h_t,c_t,y]
 
-        reset = T.iscalar('reset') # pseudo boolean for switching between training and prediction
         H = T.matrix(name="H",dtype=dtype) # initial hidden state
         C = T.matrix(name="C",dtype=dtype) # initial hidden state
-        # h_ = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial hidden state
-        # c_ = shared(np.zeros(shape=(batch_size,self.n_lstm), dtype=dtype)) # initial cell state
 
         #(1, 0, 2) -> AxBxC to BxAxC
         #(batch_size,sequence_length, n_in) >> (sequence_length, batch_size ,n_in)

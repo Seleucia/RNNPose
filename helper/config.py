@@ -5,16 +5,16 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=0 #0,full,1:resume, 2,X
-   params["rn_id"]="real_cnn_highbias" #running id, model
-   params["notes"]="real rcnn started with high bias values." #running id
+   params['run_mode']=1 #0,full,1:resume, 2,X
+   params["rn_id"]="ks_40" #running id, model
+   params["notes"]="Batch size set 1, sequence length set 40." #running id
    params["model"]="real_rcnn"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
-   params['seq_length']= 20
+   params['seq_length']= 40
    params['validate']= 1
-   params['mfile']= "xxx.p"
+   params['mfile']= "cnn_lstm_s_ks_40_3_0.278341_best.p"
 
-   params['batch_size']=10
+   params['batch_size']=1
    params['shufle_data']=0
    params['max_count']= 10
 
@@ -54,7 +54,7 @@ def get_params():
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']=500
+       params['max_count']=10000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60

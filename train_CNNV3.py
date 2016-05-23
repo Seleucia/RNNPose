@@ -10,18 +10,16 @@ from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 def train_rnn(params):
    rng = RandomStreams(seed=1234)
-   (X_train,Y_train,S_Train_list,X_test,Y_test,S_Test_list,F_list)=du.load_pose(params)
-   params["len_train"]=X_train.shape[0]*X_train.shape[1]
-   params["len_test"]=X_test.shape[0]*X_test.shape[1]
+   (X_train,Y_train,S_Train_list,F_list_train,X_test,Y_test,S_Test_list,F_list_test)=du.load_pose(params)
+   params["len_train"]=len(F_list_train)
+   params["len_test"]=len(F_list_test)
    u.start_log(params)
-   index_train_list,S_Train_list=du.get_batch_indexes(params,S_Train_list)
-   index_test_list,S_Test_list=du.get_batch_indexes(params,S_Test_list)
    batch_size=params['batch_size']
 
-   n_train_batches = len(index_train_list)
+   n_train_batches = len(F_list_train)
    n_train_batches /= batch_size
 
-   n_test_batches = len(index_test_list)
+   n_test_batches = len(F_list_test)
    n_test_batches /= batch_size
 
    nb_epochs=params['n_epochs']
@@ -43,13 +41,7 @@ def train_rnn(params):
       H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # initial hidden state
       sid=0
       for minibatch_index in range(n_train_batches):
-          id_lst=index_train_list[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
-          tmp_sid=S_Train_list[(minibatch_index + 1) * batch_size-1]
-          if(sid==0):
-              sid=tmp_sid
-          if(tmp_sid!=sid):
-              sid=tmp_sid
-              H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # resetting initial state, since seq change
+          id_lst=F_list_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
           x=X_train[id_lst] #60*20*1024
           y=Y_train[id_lst]#60*20*54
           is_train=1
@@ -71,7 +63,7 @@ def train_rnn(params):
           H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # resetting initial state, since seq change
           sid=0
           for minibatch_index in range(n_test_batches):
-             id_lst=index_test_list[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
+             id_lst=F_list_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
              tmp_sid=S_Test_list[(minibatch_index + 1) * batch_size-1]
              if(sid==0):
                   sid=tmp_sid
