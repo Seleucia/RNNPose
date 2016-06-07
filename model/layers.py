@@ -8,7 +8,7 @@ from theano.tensor.nnet import conv2d #Check if it is using gpu or not
 class LogisticRegression(object):
     def __init__(self,  rng,input, n_in, n_out):
         shape=(n_in, n_out)
-        self.W = u.init_weight(shape=shape,rng=rng,name='W_xif',sample='glorot')
+        self.W = u.init_weight(shape=shape,rng=rng,name='W_xreg',sample='glorot')
         self.b=u.init_bias(n_out,rng=rng)
 
         self.y_pred = T.dot(input, self.W) + self.b
@@ -148,13 +148,12 @@ class ConvLayer(object):
 
 class DropoutLayer(object):
     def __init__(self, rng, input, prob,is_train,mask=None):
+
         retain_prob = 1. - prob
         if(mask==None):
-            input *= rng.binomial(size=input.shape, p=retain_prob, dtype=input.dtype)
+            ret_input =input *rng.binomial(size=input.shape, p=retain_prob, dtype=input.dtype)
         else:
-            input *= mask
-
-        ret_input =input/ retain_prob #Why dividing ?
+            ret_input=input* mask
         test_output = input*retain_prob
         self.output= T.switch(T.neq(is_train, 0), ret_input, test_output)
 

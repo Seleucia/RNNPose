@@ -3,7 +3,6 @@ import numpy as np
 import theano
 import theano.tensor as T
 from theano import shared
-from helper.utils import init_weight,init_pweight,init_bias
 
 class model_base():
     def __init__(self):

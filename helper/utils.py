@@ -183,6 +183,31 @@ def get_loss(gt,est):
 
     return (loss)
 
+
+def get_loss(params,gt,est):
+    gt= np.asarray(gt)
+    # print(gt.shape)
+    batch_size=gt.shape[0]
+    loss=[]
+    if(len(gt.shape)==2):
+        for b in range(batch_size):
+            diff_vec=np.abs(gt[b].reshape(params['n_output']/3,3) - est[b].reshape(params['n_output']/3,3)) #13*3
+            diff_vec=diff_vec[~np.any(np.isnan(diff_vec), axis=1)]
+            sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
+            loss.append(np.mean(sq_m))
+        loss=np.nanmean(loss)
+    else:
+        seq_length=gt.shape[1]
+        for b in range(batch_size):
+            for s in range(seq_length):
+                diff_vec=np.abs(gt[b][s].reshape(params['n_output']/3,3) - est[b][s].reshape(params['n_output']/3,3)) #13*3
+                diff_vec=diff_vec[~np.any(np.isnan(diff_vec), axis=1)]
+                sq_m=np.sqrt(np.sum(diff_vec**2,axis=1))
+                loss.append(np.mean(sq_m))
+        loss=np.nanmean(loss)
+
+    return (loss)
+
 def get_loss_bb(gt,est):
     sf="/home/coskun/PycharmProjects/RNNPoseV2/pred/cnn_lstm_s/blanket.txt"
     batch_size=gt.shape[0]

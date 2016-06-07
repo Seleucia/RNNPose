@@ -5,18 +5,18 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=1 #0,full,1:resume, 2,X
-   params["rn_id"]="ks_40" #running id, model
-   params["notes"]="Batch size set 1, sequence length set 40." #running id
-   params["model"]="real_rcnn"#kccnr,dccnr
+   params['run_mode']=0 #0,full,1:resume, 2,X
+   params["rn_id"]="S5_reshape" #running id, model
+   params["notes"]="Batch size set 200, only cnn training." #running id
+   params["model"]="cnn"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
-   params['seq_length']= 40
+   params['seq_length']= 1
    params['validate']= 1
-   params['mfile']= "cnn_lstm_s_ks_40_3_0.278341_best.p"
+   params['mfile']= "cnn_ks_40_10_1.73353389565_best.p"
 
-   params['batch_size']=1
-   params['shufle_data']=0
-   params['max_count']= 10
+   params['batch_size']=200
+   params['shufle_data']=1
+   params['max_count']= 10000
 
    #system settings
    wd=os.path.dirname(os.path.realpath(__file__))
@@ -38,7 +38,7 @@ def get_params():
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600
    params['n_hidden']= 512
-   params['n_output']= 42
+   params['n_output']= 96
 
    if(platform.node()=="coskunh"):
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
@@ -50,11 +50,11 @@ def get_params():
        params['max_count']= 10000000
 
    if(platform.node()=="milletari-workstation"):
-       params["data_dir"]="/mnt/Data2/DataFelix/dt/"
+       params["data_dir"]="/mnt/Data1/hc/img/"
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
        params['n_hidden']= 128
-       params['max_count']=10000000
+       params['max_count']=100000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60
@@ -63,7 +63,7 @@ def get_params():
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
        params["data_dir"]="/home/cmp/PycharmProjects/data/rnn/"
        params['n_hidden']= 128
-       params['max_count']= 30
+       params['max_count']= 100
 
    #params['step_size']=[10]
    params['test_size']=0.20 #Test size

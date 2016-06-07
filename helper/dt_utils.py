@@ -24,7 +24,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    F_list=[]
    G_list=[]
    S_Test_list=[]
-   (X_test,Y_test,F_list_test,G_list,S_Test_list)= dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
+   (X_test,Y_test,F_list_test,G_list_test,S_Test_list)= dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
    print "Test set loaded"
    Y_test=Y_test/norm
    X_test=(X_test -min_tr) / (max_tr -min_tr)
@@ -33,7 +33,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    istest=False
    get_flist=False
-   X_train,Y_train,F_list_train,G_list,S_Train_list=dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
+   X_train,Y_train,F_list_train,G_list_train,S_Train_list=dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
    print "Training set loaded and shuffle started"
    if params['shufle_data']==1:
       X_train,Y_train=shuffle_in_unison_inplace(X_train,Y_train)
@@ -51,21 +51,14 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    #     Y_test=Y_test.reshape(Y_test.shape[0]*Y_test.shape[1],Y_test.shape[2])
 
 
-   return (X_train,Y_train,S_Train_list,F_list_train,X_test,Y_test,S_Test_list,F_list_test)
-
-
+   return (X_train,Y_train,S_Train_list,F_list_train,G_list_train,X_test,Y_test,S_Test_list,F_list_test,G_list_test)
 
 def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
     base_file
     if istest==0:
-        lst_act=['S1','S5','S6','S7','S8','S9','S11']
-        lst_sq=[]
+        lst_act=['S1','S6','S7','S8','S9','S11']
     else:
-        lst_act=['S1','S5','S6','S7','S8','S9','S11']
-        #severine_eatso_1622
-        lst_sq=[]
-        # lst_sq=['movementsh']
-        # lst_act=['meng']
+        lst_act=['S5']
     X_D=[]
     Y_D=[]
     F_L=[]
@@ -78,10 +71,23 @@ def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
         for sq in lst_sq:
             seq_id+=1
             tmp_folder=base_file+actor+"/"+sq+"/"
-            mx= len([name for name in os.listdir(tmp_folder) if os.path.isfile(name)])
-            fl_list=range(1,mx)
-            pth_list=[actor+'/'+sq+'/'+str(f) for f in fl_list]
-            F_L.extend(pth_list)
+            fl=tmp_folder+'img2joints.txt'
+            with open(fl, "rb") as f:
+                data=f.read().strip().split(' ')
+                data=data[0].split('\n')
+                i_d = [int(val) for val in data]
+                myset = set(i_d)
+                for item in myset:
+                   ind= i_d.index(item)+1
+                   g=actor+'/'+sq+'/'+str(ind)
+                   x=actor+'/'+sq+'/'+str(item)
+                   G_L.append(g)
+                   F_L.append(x)
+
+            if len(F_L)>=max_count:
+                return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+
     return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
 
 
@@ -560,27 +566,27 @@ def load_test_bboxes(params,max_count):
                        X_d.append(x_d)
    return (numpy.asarray(X_d))
 
-def load_batch(params,f_list):
-    X_d,Y_d=[]
+def load_batch(params,x_lst,y_lst):
+    X_d=[]
+    Y_d=[]
     base_file=params["data_dir"]
-    for f in f_list:
-        fl=base_file+'img/'+f
-        gl=base_file+'joints/'+f
+    for f in range(params['batch_size']):
+        fl=base_file+x_lst[f]+'.txt'
+        gl=base_file.replace('img','joints')+y_lst[f]+'.txt'
         if not os.path.isfile(fl):
            continue
-
         with open(gl, "rb") as f:
           data=f.read().strip().split(' ')
           y_d= [float(val) for val in data]
           # if(numpy.isnan(numpy.sum(y_d))):
           #     continue;
-          Y_d.append(numpy.asarray(y_d))
+          Y_d.append(numpy.asarray(y_d)/1000)
 
         with open(fl, "rb") as f:
            data=f.read().strip().split(' ')
+           data=data[0].split('\n')
            x_d = [float(val) for val in data]
-           X_d.append(numpy.asarray(x_d))
-
+           X_d.append(numpy.asarray(x_d)/10)
     return X_d,Y_d
 
 def get_batch_indexes(params,S_list):
