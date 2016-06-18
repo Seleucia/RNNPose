@@ -17,11 +17,12 @@ class LogisticRegression(object):
 
 
 class HiddenLayer(object):
-    def __init__(self, rng, input, n_in, n_out,activation=T.tanh):
+    def __init__(self, rng, input, n_in, n_out,W=None,b=None,activation=T.tanh):
         self.input = input
         shape=[n_in,n_out]
-        W =u.init_weight(shape=shape,rng=rng,name="w_hid",sample="glorot")
-        b=u.init_bias(n_out,rng)
+        if(W ==None):
+            W =u.init_weight(shape=shape,rng=rng,name="w_hid",sample="glorot")
+            b=u.init_bias(n_out,rng)
         self.W = W
         self.b = b
 
