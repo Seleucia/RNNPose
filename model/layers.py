@@ -6,11 +6,13 @@ from helper.utils import init_weight,init_bias,get_err_fn
 from theano.tensor.nnet import conv2d #Check if it is using gpu or not
 
 class LogisticRegression(object):
-    def __init__(self,  rng,input, n_in, n_out):
+    def __init__(self,  rng,input, n_in, n_out,W=None,b=None):
         shape=(n_in, n_out)
-        self.W = u.init_weight(shape=shape,rng=rng,name='W_xreg',sample='glorot')
-        self.b=u.init_bias(n_out,rng=rng)
-
+        if(W ==None):
+            W = u.init_weight(shape=shape,rng=rng,name='W_xreg',sample='glorot')
+            b=u.init_bias(n_out,rng=rng)
+        self.W = W
+        self.b = b
         self.y_pred = T.dot(input, self.W) + self.b
         self.params = [self.W, self.b]
         self.input = input

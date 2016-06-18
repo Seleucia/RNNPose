@@ -10,6 +10,7 @@ from model.cnn_lstm import cnn_lstm
 from model.cnn import cnn
 from model.cnn2 import cnn2
 from model.cnn3 import cnn3
+from model.autoenconder import autoenconder
 from model.real_rcnn import real_rcnn
 from helper.optimizer import ClipRMSprop, RMSprop,Adam
 import helper.utils as u
@@ -42,6 +43,8 @@ def get_model(params,rng):
         model = cnn2(rng=rng,params=params,optimizer=Adam)
     elif(params["model"]=="cnn3"):
         model = cnn3(rng=rng,params=params,optimizer=Adam)
+    elif(params["model"]=="autoenconder"):
+        model = autoenconder(rng=rng,params=params,optimizer=Adam)
     else:
         model=None
     return model

@@ -10,14 +10,14 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
-   dataset_reader=read_full_poseV4 #read_full_poseV2,load_full_pose
+   dataset_reader=read_full_joints #read_full_poseV2,load_full_pose
    # min_tr=0.000000
    # max_tr=8.190918
    # norm=2#numpy.linalg.norm(X_test)
 
-   min_tr=0.000000
-   max_tr=3
-   norm=2#numpy.linalg.norm(X_test)
+   # min_tr=0.000000
+   # max_tr=3
+   # norm=2#numpy.linalg.norm(X_test)
 
    istest=True
    get_flist=False
@@ -26,8 +26,8 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    S_Test_list=[]
    (X_test,Y_test,F_list_test,G_list_test,S_Test_list)= dataset_reader(data_dir,max_count,seq_length,sindex,istest,get_flist)
    print "Test set loaded"
-   Y_test=Y_test/norm
-   X_test=(X_test -min_tr) / (max_tr -min_tr)
+   # Y_test=Y_test/norm
+   # X_test=(X_test -min_tr) / (max_tr -min_tr)
    if only_test==1:
       return (X_test,Y_test,F_list_test,G_list_test,S_Test_list)
 
@@ -53,6 +53,41 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    return (X_train,Y_train,S_Train_list,F_list_train,G_list_train,X_test,Y_test,S_Test_list,F_list_test,G_list_test)
 
+def read_full_joints(base_file,max_count,p_count,sindex,istest,get_flist=False):
+    base_file=base_file.replace('img','joints')
+    if istest==0:
+        lst_act=['S1']
+    else:
+        lst_act=['S9']
+    X_D=[]
+    Y_D=[]
+    F_L=[]
+    G_L=[]
+    S_L=[]
+    seq_id=0
+    for actor in lst_act:
+        tmp_folder=base_file+actor+"/"
+        lst_sq=os.listdir(tmp_folder)
+        for sq in lst_sq:
+            seq_id+=1
+            tmp_folder=base_file+actor+"/"+sq+"/"
+            file_list=os.listdir(tmp_folder)
+            for fl in file_list:
+                p=tmp_folder+fl
+                if not os.path.isfile(p):
+                   continue
+                with open(p, "rb") as f:
+                  data=f.read().strip().split(' ')
+                  y_d= [float(val) for val in data]
+                  Y_D.append(numpy.asarray(y_d)/1000)
+
+
+            if len(Y_D)>=max_count:
+                X_D=Y_D
+                return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+    X_D=Y_D
+    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
 
 def read_full_poseV5(base_file,max_count,p_count,sindex,istest,get_flist=False):
     base_file
@@ -81,16 +116,17 @@ def read_full_poseV5(base_file,max_count,p_count,sindex,istest,get_flist=False):
                 for item in myset:
                    ind= i_d.index(item)+1
                    g=actor+'/'+sq+'/'+str(ind)
-                   x=actor+'/'+sq+'/'+str(item)
-                   G_L.append(g)
-                   F_L.append(x)
-                   S_L.append(seq_id)
+                   data=f.read().strip().split(' ')
+                   y_d= [float(val) for val in data]
+                   Y_D.append(numpy.asarray(y_d))
 
             if len(F_L)>=max_count:
                 return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
 
 
     return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+
 
 def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
     base_file

@@ -11,15 +11,15 @@ from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 def train_rnn(params):
    rng = RandomStreams(seed=1234)
    (X_train,Y_train,S_Train_list,F_list_train,G_list_train,X_test,Y_test,S_Test_list,F_list_test,G_list_test)=du.load_pose(params)
-   params["len_train"]=len(F_list_train)
-   params["len_test"]=len(F_list_test)
+   params["len_train"]=len(X_train)
+   params["len_test"]=len(X_test)
    u.start_log(params)
    batch_size=params['batch_size']
 
-   n_train_batches = len(F_list_train)
+   n_train_batches =params["len_train"]
    n_train_batches /= batch_size
 
-   n_test_batches = len(F_list_test)
+   n_test_batches = params["len_test"]
    n_test_batches /= batch_size
 
    nb_epochs=params['n_epochs']
@@ -38,20 +38,15 @@ def train_rnn(params):
    best_loss=1000
    for epoch_counter in range(nb_epochs):
       batch_loss = 0.
-      # H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # initial hidden state
       sid=0
       for minibatch_index in range(n_train_batches):
-          x_lst=F_list_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
-          y_lst=G_list_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
-          x,y=du.load_batch(params,x_lst,y_lst)
-          # x=X_train[id_lst] #60*20*1024
-          # y=Y_train[id_lst]#60*20*54
-          is_train=1
+          x=X_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
+          y=Y_train[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
           if(params["model"]=="blstmnp"):
              x_b=np.asarray(map(np.flipud,x))
              loss = model.train(x,x_b,y)
           else:
-             loss= model.train(x, y,is_train)
+             loss= model.train(x, y)
           batch_loss += loss
       if params['shufle_data']==1:
          X_train,Y_train=du.shuffle_in_unison_inplace(X_train,Y_train)
@@ -62,26 +57,10 @@ def train_rnn(params):
       if(epoch_counter%3==0):
           print("Model testing")
           batch_loss3d = []
-          H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # resetting initial state, since seq change
-          sid=0
           for minibatch_index in range(n_test_batches):
-             x_lst=F_list_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
-             y_lst=G_list_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
-             x,y=du.load_batch(params,x_lst,y_lst)
-             # tmp_sid=S_Test_list[(minibatch_index + 1) * batch_size-1]
-             # if(sid==0):
-             #      sid=tmp_sid
-             # if(tmp_sid!=sid):
-             #      sid=tmp_sid
-             #      H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # resetting initial state, since seq change
-             # x=X_test[id_lst] #60*20*1024
-             # y=Y_test[id_lst]#60*20*54
-             is_train=0
-             if(params["model"]=="blstmnp"):
-                x_b=np.asarray(map(np.flipud,x))
-                pred = model.predictions(x,x_b)
-             else:
-                pred= model.predictions(x,is_train)
+             x=X_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
+             y=Y_test[minibatch_index * batch_size: (minibatch_index + 1) * batch_size] #60*20*1024
+             pred= model.predictions(x)
              loss3d =u.get_loss(params,y,pred)
              batch_loss3d.append(loss3d)
           batch_loss3d=np.nanmean(batch_loss3d)

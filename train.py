@@ -10,7 +10,7 @@ from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 
 def train_rnn(params):
    rng = RandomStreams(seed=1234)
-   (X_train,Y_train,S_Train_list,X_test,Y_test,S_Test_list,F_list)=du.load_pose(params)
+   (X_train,Y_train,S_Train_list,F_list_train,G_list_train,X_test,Y_test,S_Test_list,F_list_test,G_list_test)=du.load_pose(params)
    params["len_train"]=X_train.shape[0]*X_train.shape[1]
    params["len_test"]=X_test.shape[0]*X_test.shape[1]
    u.start_log(params)

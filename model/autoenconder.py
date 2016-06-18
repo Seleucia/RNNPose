@@ -11,7 +11,7 @@ from helper.optimizer import RMSprop
 # theano.config.exception_verbosity="high"
 dtype = T.config.floatX
 
-class cnn(object):
+class autoenconder(object):
     def __init__(self,rng,params,cost_function='mse',optimizer = RMSprop):
 
         lr=params["lr"]
@@ -22,9 +22,13 @@ class cnn(object):
         # minibatch)
         X = T.matrix(name="input",dtype=dtype) # batch of sequence of vector
         Y = T.matrix(name="output",dtype=dtype) # batch of sequence of vector
-        shape=(batch_size,n_output)
-        X_tilde= self.theano_rng.binomial(size=X.shape, n=1, p=1 - corruption_level,
-                                        dtype=theano.config.floatX) * X
+        bin_noise=rng.binomial(size=(batch_size,n_output/3,1), n=1,p=1 - corruption_level,dtype=theano.config.floatX)
+        #bin_noise_3d= T.reshape(T.concatenate((bin_noise, bin_noise,bin_noise),axis=1),(batch_size,n_output/3,3))
+        bin_noise_3d= T.concatenate((bin_noise, bin_noise,bin_noise),axis=2)
+
+        noise= rng.normal(size=(batch_size,n_output), std=0.03, avg=0.0,dtype=theano.config.floatX)
+        noise_bin=T.reshape(noise,(batch_size,n_output/3,3))*bin_noise_3d
+        X_tilde=T.reshape(noise_bin,(batch_size,n_output))+X
 
         W_1_e =u.init_weight(shape=(96,1024),rng=rng,name="w_hid",sample="glorot")
         b_1_e=u.init_bias(1024,rng)
@@ -38,15 +42,16 @@ class cnn(object):
         W_1_d = W_1_e.T
         b_1_d=u.init_bias(96,rng)
 
-
         h_1_e=HiddenLayer(rng,X_tilde,0,0, W=W_1_e,b=b_1_e,activation=nn.relu)
         h_2_e=HiddenLayer(rng,h_1_e.output,0,0, W=W_2_e,b=b_2_e,activation=nn.relu)
-        h_2_d=HiddenLayer(rng,h_2_e.output,0,0, W=W_2_d,b=b_2_d,activation=nn.relu)
-        h_1_d=HiddenLayer(rng,h_2_d.output,0,0, W=W_1_d,b=b_1_d,activation=nn.relu)
+        h_2_d=HiddenLayer(rng,h_2_e.output,0,0, W=W_2_d,b=b_2_d,activation=u.do_nothing)
+        h_1_d=LogisticRegression(rng,h_2_d.output,0,0, W=W_1_d,b=b_1_d)
 
-        self.output = h_1_e.output
+        self.output = h_1_d.y_pred
 
-        self.params =h_1_e.params+h_2_e.params+h_2_d.params+h_1_d.params
+        self.params =h_1_e.params+h_2_e.params
+        self.params.append(b_2_d)
+        self.params.append(b_1_d)
 
         cost=get_err_fn(self,cost_function,Y)
         L2_reg=0.0001

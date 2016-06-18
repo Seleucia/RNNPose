@@ -5,8 +5,8 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=1 #0,full,1:resume, 2,X
-   params["rn_id"]="S9-11_tr_cnn_fn" #running id, model
+   params['run_mode']=0 #0,full,1:resume, 2,X
+   params["rn_id"]="auto" #running id, model
    params["notes"]="Batch size set 100, only cnn training." #running id
    params["model"]="cnn2"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
@@ -17,6 +17,7 @@ def get_params():
    params['batch_size']=100
    params['shufle_data']=1
    params['max_count']= 10000
+   params["corruption_level"]=0.5
 
    #system settings
    wd=os.path.dirname(os.path.realpath(__file__))
@@ -46,8 +47,9 @@ def get_params():
        params["WITH_GPU"]=False
        params['n_patch']= 1
        params['n_repeat']= 1
+       params["data_dir"]="/home/coskun/PycharmProjects/data/auto/"
        params['n_hidden']= 128
-       params['max_count']= 10000000
+       params['max_count']= 100
 
    if(platform.node()=="milletari-workstation"):
        params["data_dir"]="/mnt/Data1/hc/img/"
@@ -61,7 +63,7 @@ def get_params():
        params["n_procc"]=1
        params["WITH_GPU"]=True
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
-       params["data_dir"]="/home/cmp/PycharmProjects/data/rnn/"
+       params["data_dir"]="/home/coskun/PycharmProjects/data/auto/"
        params['n_hidden']= 128
        params['max_count']= 100
 
