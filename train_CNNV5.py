@@ -11,6 +11,7 @@ from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 def train_rnn(params):
    rng = RandomStreams(seed=1234)
    (X_train,Y_train,S_Train_list,F_list_train,G_list_train,X_test,Y_test,S_Test_list,F_list_test,G_list_test)=du.load_pose(params)
+   F_list_train,G_list_train=du.shuffle_in_unison_inplace(F_list_train,G_list_train)
    params["len_train"]=len(F_list_train)
    params["len_test"]=len(F_list_test)
    u.start_log(params)
@@ -54,12 +55,12 @@ def train_rnn(params):
              loss= model.train(x, y,is_train)
           batch_loss += loss
       if params['shufle_data']==1:
-         X_train,Y_train=du.shuffle_in_unison_inplace(X_train,Y_train)
+         F_list_train,G_list_train=du.shuffle_in_unison_inplace(F_list_train,G_list_train)
       train_errors[epoch_counter] = batch_loss
       batch_loss/=n_train_batches
       s='TRAIN--> epoch %i | error %f'%(epoch_counter, batch_loss)
       u.log_write(s,params)
-      if(epoch_counter%3==0):
+      if(epoch_counter%1==0):
           print("Model testing")
           batch_loss3d = []
           H=C=np.zeros(shape=(batch_size,params['n_hidden']), dtype=dtype) # resetting initial state, since seq change

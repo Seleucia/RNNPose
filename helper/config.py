@@ -5,16 +5,16 @@ import platform
 def get_params():
    global params
    params={}
-   params['run_mode']=0 #0,full,1:resume, 2,X
-   params["rn_id"]="S5_reshape" #running id, model
-   params["notes"]="Batch size set 200, only cnn training." #running id
-   params["model"]="cnn"#kccnr,dccnr
+   params['run_mode']=1 #0,full,1:resume, 2,X
+   params["rn_id"]="S9-11_tr_cnn_fn" #running id, model
+   params["notes"]="Batch size set 100, only cnn training." #running id
+   params["model"]="cnn2"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
    params['seq_length']= 1
    params['validate']= 1
-   params['mfile']= "cnn_ks_40_10_1.73353389565_best.p"
+   params['mfile']= "cnn_S9-11_tr_cnn_fn_50_0.335340836156_best.p"
 
-   params['batch_size']=200
+   params['batch_size']=100
    params['shufle_data']=1
    params['max_count']= 10000
 
@@ -33,7 +33,7 @@ def get_params():
 
    # learning parameters
    params['momentum']=0.9    # the params for momentum
-   params['lr']=0.0001
+   params['lr']=0.00001
    params['learning_rate_decay']= 0.998
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600

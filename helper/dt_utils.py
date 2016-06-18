@@ -29,7 +29,7 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    Y_test=Y_test/norm
    X_test=(X_test -min_tr) / (max_tr -min_tr)
    if only_test==1:
-      return (X_test,Y_test,F_list,G_list)
+      return (X_test,Y_test,F_list_test,G_list_test,S_Test_list)
 
    istest=False
    get_flist=False
@@ -40,8 +40,8 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    #print("min: %f, max: %f "%(numpy.min(X_train),numpy.max(X_train)))
 
-   Y_train=Y_train/norm
-   X_train=(X_train -min_tr) / (max_tr -min_tr)
+   # Y_train=Y_train/norm
+   # X_train=(X_train -min_tr) / (max_tr -min_tr)
    print "Dataset Loading completed..."
 
    # if(params["model"]=="cnn"):
@@ -53,7 +53,8 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    return (X_train,Y_train,S_Train_list,F_list_train,G_list_train,X_test,Y_test,S_Test_list,F_list_test,G_list_test)
 
-def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
+
+def read_full_poseV5(base_file,max_count,p_count,sindex,istest,get_flist=False):
     base_file
     if istest==0:
         lst_act=['S1','S6','S7','S8','S9','S11']
@@ -83,6 +84,7 @@ def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
                    x=actor+'/'+sq+'/'+str(item)
                    G_L.append(g)
                    F_L.append(x)
+                   S_L.append(seq_id)
 
             if len(F_L)>=max_count:
                 return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
@@ -90,6 +92,45 @@ def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
 
     return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
 
+def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
+    base_file
+    if istest==0:
+        lst_act=['S1','S5','S6','S7','S8']
+    else:
+        lst_act=['S9','S11']
+    X_D=[]
+    Y_D=[]
+    F_L=[]
+    G_L=[]
+    S_L=[]
+    seq_id=0
+    for actor in lst_act:
+        tmp_folder=base_file+actor+"/"
+        lst_sq=os.listdir(tmp_folder)
+        # lst_sq=['Walking.cdf','Directions 1.cdf','Eating 1.cdf','Sitting 1.cdf']
+        # lst_sq=['Walking.cdf']
+        # print(lst_sq)
+        for sq in lst_sq:
+            seq_id+=1
+            tmp_folder=base_file+actor+"/"+sq+"/"
+            fl=tmp_folder+'img2joints.txt'
+            with open(fl, "rb") as f:
+                data=f.read().strip().split(' ')
+                data=data[0].split('\n')
+                i_d = [int(val) for val in data]
+                myset = set(i_d)
+                for item in myset:
+                   ind= i_d.index(item)+1
+                   g=actor+'/'+sq+'/'+str(ind)
+                   x=actor+'/'+sq+'/'+str(item)
+                   G_L.append(g)
+                   F_L.append(x)
+
+            if len(F_L)>=max_count:
+                return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+
+    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
 
 def read_full_poseV3(base_file,max_count,p_count,sindex,istest,get_flist=False):
     if istest==0:
@@ -587,7 +628,7 @@ def load_batch(params,x_lst,y_lst):
            data=data[0].split('\n')
            x_d = [float(val) for val in data]
            X_d.append(numpy.asarray(x_d)/10)
-    return X_d,Y_d
+    return numpy.asarray(X_d),numpy.asarray(Y_d)
 
 def get_batch_indexes(params,S_list):
    batch_size=params['batch_size']
@@ -631,7 +672,6 @@ def get_batch_indexes(params,S_list):
 
    return glob.glob("/home/adam/*.txt")
 
-
 def get_folder_name_list(params):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
@@ -652,4 +692,4 @@ def write_predictions(params,pred,N_list):
 def shuffle_in_unison_inplace(a, b):
    assert len(a) == len(b)
    p = numpy.random.permutation(len(a))
-   return a[p], b[p]
+   return numpy.asarray(a)[p].tolist(),numpy.asarray(b)[p].tolist()

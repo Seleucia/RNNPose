@@ -148,7 +148,6 @@ class ConvLayer(object):
 
 class DropoutLayer(object):
     def __init__(self, rng, input, prob,is_train,mask=None):
-
         retain_prob = 1. - prob
         if(mask==None):
             ret_input =input *rng.binomial(size=input.shape, p=retain_prob, dtype=input.dtype)

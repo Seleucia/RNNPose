@@ -1,61 +1,38 @@
-from keras.layers.convolutional import Convolution2D, MaxPooling2D
-from keras.layers.core import Dense, Activation, Flatten,Dropout
-from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation
-from keras.layers.embeddings import Embedding
-from keras.layers.recurrent import GRU
+import cv2
+print(cv2.__version__)
 
-max_caption_len = 16
-vocab_size = 10000
+fl='/mnt/Data1/hc/rgb/S1/Videos/Directions.55011271.mp4'
+sv='frms/'
+vidcap = cv2.VideoCapture('/mnt/Data1/hc/rgb/S1/Videos/Directions.55011271.mp4')
+vidcap = cv2.VideoCapture('/home/coskun/PycharmProjects/RNNPoseV2/pred/3.6m/output.avi')
+success,image = vidcap.read()
+print vidcap.isOpened()
+import os, sys
+from PIL import Image
 
-# first, let's define an image model that
-# will encode pictures into 128-dimensional vectors.
-# it should be initialized with pre-trained weights.
-image_model = Sequential()
-image_model.add(Convolution2D(32, 3, 3, input_shape=(3, 100, 100)))
-image_model.add(Activation('relu'))
-image_model.add(Convolution2D(32, 3, 3))
-image_model.add(Activation('relu'))
-image_model.add(MaxPooling2D(pool_size=(2, 2)))
 
-image_model.add(Convolution2D(64, 3, 3))
-image_model.add(Activation('relu'))
-image_model.add(Convolution2D(64, 3, 3))
-image_model.add(Activation('relu'))
-image_model.add(MaxPooling2D(pool_size=(2, 2)))
+# a, b, c = os.popen3("ffmpeg -i "+fl)
+# out = c.read()
+# dp = out.index("Duration: ")
+# duration = out[dp+10:dp+out[dp:].index(",")]
+# hh, mm, ss = map(float, duration.split(":"))
+# total = (hh*60 + mm)*60 + ss
+# for i in xrange(100):
+#     # t = (i + 1) * 100 / 10
+#     # os.system("ffmpeg -i test.avi -ss %0.3fs frame%i.png" % (t, i))
+#     cmd="ffmpeg -i %s -vcodec png -ss %i -vframes 1 -an -f rawvideo frms/frame%i.png" % (fl,i, i)
+#     # print(cmd)
+#     os.system(cmd)
+#     # ffmpeg -i test.avi -vcodec png -ss 10 -vframes 1 -an -f rawvideo test.png
+#
 
-image_model.add(Flatten())
-image_model.add(Dense(128))
 
-# let's load the weights from a save file.
-image_model.load_weights('weight_file.h5')
 
-# next, let's define a RNN model that encodes sequences of words
-# into sequences of 128-dimensional word vectors.
-language_model = Sequential()
-language_model.add(Embedding(vocab_size, 256, input_length=max_caption_len))
-language_model.add(GRU(output_dim=128, return_sequences=True))
-language_model.add(TimeDistributedDense(128))
 
-# let's repeat the image vector to turn it into a sequence.
-image_model.add(RepeatVector(max_caption_len))
-
-# the output of both models will be tensors of shape (samples, max_caption_len, 128).
-# let's concatenate these 2 vector sequences.
-model = Merge([image_model, language_model], mode='concat', concat_axis=-1)
-# let's encode this vector sequence into a single vector
-model.add(GRU(256, 256, return_sequences=False))
-# which will be used to compute a probability
-# distribution over what the next word in the caption should be!
-model.add(Dense(vocab_size))
-model.add(Activation('softmax'))
-
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
-
-# "images" is a numpy float array of shape (nb_samples, nb_channels=3, width, height).
-# "captions" is a numpy integer array of shape (nb_samples, max_caption_len)
-# containing word index sequences representing partial captions.
-# "next_words" is a numpy float array of shape (nb_samples, vocab_size)
-# containing a categorical encoding (0s and 1s) of the next word in the corresponding
-# partial caption.
-model.fit([images, partial_captions], next_words, batch_size=16, nb_epoch=100)
+count = 0
+success = True
+while success:
+  success,image = vidcap.read()
+  print 'Read a new frame: ', success
+  cv2.imwrite("frms/frame%d.jpg" % count, image)     # save frame as JPEG file
+  count += 1

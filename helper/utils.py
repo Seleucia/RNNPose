@@ -208,6 +208,33 @@ def get_loss(params,gt,est):
 
     return (loss)
 
+def get_loss_pred(params,gt,est):
+    fest="/home/coskun/PycharmProjects/RNNPoseV2/pred/3.6m/estimation.txt"
+    fgt="/home/coskun/PycharmProjects/RNNPoseV2/pred/3.6m/ground_truth.txt"
+    loss=0
+    loss_list=[]
+    with open(fest,"a") as f_handle_est,  open(fgt,"a") as f_handle_gt:
+        for b in range(len(gt)):
+            diff_vec=np.abs(gt[b].reshape(params['n_output']/3,3) - est[b].reshape(params['n_output']/3,3)) #14,3
+            for val in est[b]:
+                f_handle_est.write("%f "%(val*1000))
+            for val in gt[b]:
+                f_handle_gt.write("%f "%(val*1000))
+            # val=np.sqrt(np.sum(diff_vec**2,axis=1))
+            #
+            # for i in range(14):
+            #     f=val[i]
+            #     f_handle.write("%f"%(f))
+            #     if(i<13):
+            #         f_handle.write(";")
+            f_handle_est.write('\n')
+            f_handle_gt.write('\n')
+            b_l=np.sqrt(np.sum(diff_vec**2,axis=1))
+            loss_list.append(b_l)
+            loss +=np.nanmean(np.sqrt(np.sum(diff_vec**2,axis=1)))
+        loss=np.nanmean(loss)
+    return (loss,loss_list)
+
 def get_loss_bb(gt,est):
     sf="/home/coskun/PycharmProjects/RNNPoseV2/pred/cnn_lstm_s/blanket.txt"
     batch_size=gt.shape[0]
