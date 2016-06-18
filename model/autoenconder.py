@@ -19,7 +19,6 @@ class autoenconder(object):
         n_output=params['n_output']
         corruption_level=params["corruption_level"]
 
-        # minibatch)
         X = T.matrix(name="input",dtype=dtype) # batch of sequence of vector
         Y = T.matrix(name="output",dtype=dtype) # batch of sequence of vector
         bin_noise=rng.binomial(size=(batch_size,n_output/3,1), n=1,p=1 - corruption_level,dtype=theano.config.floatX)
