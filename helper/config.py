@@ -6,17 +6,16 @@ def get_params():
    global params
    params={}
    params['run_mode']=0 #0,full,1:resume, 2,X
-   params["rn_id"]="auto" #running id, model
-   params["notes"]="Batch size set 100, only cnn training." #running id
-   params["model"]="cnn2"#kccnr,dccnr
+   params["rn_id"]="lstm_tes" #running id, model
+   params["notes"]="lstm with 16 joints" #running id
+   params["model"]="lstm"#kccnr,dccnr
    params["optimizer"]="Adam" #1=classic kcnnr, 2=patch, 3=conv, 4 =single channcel
-   params['seq_length']= 1
+   params['seq_length']= 50
    params['validate']= 1
-   params['mfile']= "cnn_S9-11_tr_cnn_fn_50_0.335340836156_best.p"
+   params['mfile']= "autoencoder_autoencoder_144_0.0179401_best.p"
 
-   params['batch_size']=100
+   params['batch_size']=1
    params['shufle_data']=1
-   params['max_count']= 10000
    params["corruption_level"]=0.5
 
    #system settings
@@ -38,8 +37,8 @@ def get_params():
    params['learning_rate_decay']= 0.998
    params['squared_filter_length_limit']=15.0
    params['n_epochs']=25600
-   params['n_hidden']= 512
-   params['n_output']= 96
+   params['n_hidden']= 1000
+   params['n_output']= 48
 
    if(platform.node()=="coskunh"):
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
@@ -49,21 +48,21 @@ def get_params():
        params['n_repeat']= 1
        params["data_dir"]="/home/coskun/PycharmProjects/data/auto/"
        params['n_hidden']= 128
-       params['max_count']= 100
+       params['max_count']= 10000
 
    if(platform.node()=="milletari-workstation"):
        params["data_dir"]="/mnt/Data1/hc/img/"
        params["caffe"]="/usr/local/caffe/python"
        params["WITH_GPU"]=True
-       params['n_hidden']= 128
-       params['max_count']=100000000
+       params['n_hidden']= 1000
+       params['max_count']=10000000000
 
    if(platform.node()=="cmp-comp"):
        params['batch_size']=60
        params["n_procc"]=1
        params["WITH_GPU"]=True
        params["caffe"]="/home/coskun/sftpkg/caffe/python"
-       params["data_dir"]="/home/coskun/PycharmProjects/data/auto/"
+       params["data_dir"]="/mnt/Data1/hc/joints/"
        params['n_hidden']= 128
        params['max_count']= 100
 

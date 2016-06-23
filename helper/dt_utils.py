@@ -10,7 +10,9 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
    data_dir=params["data_dir"]
    max_count=params["max_count"]
    seq_length=params["seq_length"]
-   dataset_reader=read_full_joints #read_full_poseV2,load_full_pose
+   # dataset_reader=read_full_midlayer #read_full_joints,read_full_midlayer
+   # dataset_reader=read_full_joints #read_full_joints,read_full_midlayer
+   dataset_reader=read_full_midlayer_sequence #read_full_joints,read_full_midlayer
    # min_tr=0.000000
    # max_tr=8.190918
    # norm=2#numpy.linalg.norm(X_test)
@@ -53,12 +55,66 @@ def load_pose(params,only_test=0,only_pose=1,sindex=0):
 
    return (X_train,Y_train,S_Train_list,F_list_train,G_list_train,X_test,Y_test,S_Test_list,F_list_test,G_list_test)
 
-def read_full_joints(base_file,max_count,p_count,sindex,istest,get_flist=False):
-    base_file=base_file.replace('img','joints')
+def read_full_midlayer_sequence(base_file,max_count,p_count,sindex,istest,get_flist=False):
+    base_file=base_file.replace('img','joints16')
+
+    f_dir="/mnt/Data1/hc/auto/"
     if istest==0:
-        lst_act=['S1']
+        lst_act=['S1','S5','S6','S7','S8']
     else:
-        lst_act=['S9']
+        lst_act=['S9','S11']
+    X_D=[]
+    Y_D=[]
+    F_L=[]
+    G_L=[]
+    S_L=[]
+    seq_id=0
+    for actor in lst_act:
+        tmp_folder=base_file+actor+"/"
+        lst_sq=os.listdir(tmp_folder)
+        for sq in lst_sq:
+            X_d=[]
+            Y_d=[]
+            F_l=[]
+            seq_id+=1
+            tmp_folder=base_file+actor+"/"+sq+"/"
+            file_list=os.listdir(tmp_folder)
+            for fl in file_list:
+                p=tmp_folder+fl
+                if not os.path.isfile(p):
+                   continue
+                with open(p, "rb") as f:
+                  data=f.read().strip().split(' ')
+                  y_d= [float(val) for val in data]
+                  Y_d.append(numpy.asarray(y_d)/1000)
+                  F_l.append(p)
+                p=f_dir+actor+'/'+sq+'/'+fl
+                with open(p, "rb") as f:
+                  rd=f.read()
+                  data=rd.strip().split('\n')
+                  x_d= [float(val) for val in data]
+                  X_d.append(numpy.asarray(x_d))
+                if len(X_d)==p_count and p_count>0:
+                        X_D.append(X_d)
+                        Y_D.append(Y_d)
+                        F_L.append(F_l)
+                        S_L.append(seq_id)
+                        X_d=[]
+                        Y_d=[]
+                        F_l=[]
+                if len(Y_D)>=max_count:
+                    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+def read_full_midlayer(base_file,max_count,p_count,sindex,istest,get_flist=False):
+    base_file=base_file.replace('img','joints')
+
+    f_dir="/mnt/Data1/hc/auto/"
+    if istest==0:
+        lst_act=['S1','S5','S6','S7','S8']
+    else:
+        lst_act=['S9','S11','S1','S5','S6','S7','S8']
     X_D=[]
     Y_D=[]
     F_L=[]
@@ -80,6 +136,55 @@ def read_full_joints(base_file,max_count,p_count,sindex,istest,get_flist=False):
                   data=f.read().strip().split(' ')
                   y_d= [float(val) for val in data]
                   Y_D.append(numpy.asarray(y_d)/1000)
+                  F_L.append(p)
+                p=f_dir+actor+'/'+sq+'/'+fl
+                with open(p, "rb") as f:
+                  rd=f.read()
+                  data=rd.strip().split('\n')
+                  x_d= [float(val) for val in data]
+                  X_D.append(numpy.asarray(x_d))
+
+
+
+            if len(Y_D)>=max_count:
+                X_D=Y_D
+                return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+    X_D=Y_D
+    return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
+
+def read_full_joints(base_file,max_count,p_count,sindex,istest,get_flist=False):
+    base_file=base_file.replace('img','joints16')
+    if istest==0:
+        lst_act=['S1','S5','S6','S7','S8']
+    else:
+        # lst_act=['S9','S11','S1','S5','S6','S7','S8']
+         lst_act=['S9','S11']
+    X_D=[]
+    Y_D=[]
+    F_L=[]
+    G_L=[]
+    S_L=[]
+    seq_id=0
+    for actor in lst_act:
+        tmp_folder=base_file+actor+"/"
+        lst_sq=os.listdir(tmp_folder)
+        for sq in lst_sq:
+            seq_id+=1
+            tmp_folder=base_file+actor+"/"+sq+"/"
+            file_list=os.listdir(tmp_folder)
+            # print file_list
+            for fl in file_list:
+                p=tmp_folder+fl
+                if not os.path.isfile(p):
+                   continue
+                with open(p, "rb") as f:
+                  data=f.read().strip().split(' ')
+                  y_d= [float(val) for val in data]
+                  Y_D.append(numpy.asarray(y_d)/1000)
+                  if p in F_L:
+                      print p
+                  F_L.append(p)
 
 
             if len(Y_D)>=max_count:
@@ -125,8 +230,6 @@ def read_full_poseV5(base_file,max_count,p_count,sindex,istest,get_flist=False):
 
 
     return (numpy.asarray(X_D,dtype=numpy.float32),numpy.asarray(Y_D,dtype=numpy.float32),F_L,G_L,S_L)
-
-
 
 def read_full_poseV4(base_file,max_count,p_count,sindex,istest,get_flist=False):
     base_file
@@ -700,13 +803,6 @@ def get_batch_indexes(params,S_list):
 
    return (index_list,SID_List)
 
-
-
-
-
-
-
-   return glob.glob("/home/adam/*.txt")
 
 def get_folder_name_list(params):
    data_dir=params["data_dir"]

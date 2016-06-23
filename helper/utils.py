@@ -147,6 +147,25 @@ def prep_pred_file(params):
             os.makedirs(f_dir)
     map( os.unlink, (os.path.join( f_dir,f) for f in os.listdir(f_dir)) )
 
+def write_auto_pred(est,F_list,params):
+    f_dir="/mnt/Data1/hc/auto/"
+    ist=0
+    for b in range(len(est)):
+        action=F_list[b].split('/')[-2]
+        sb=F_list[b].split('/')[-3]
+        if not os.path.exists(f_dir+sb):
+                os.makedirs(f_dir+sb)
+        if not os.path.exists(f_dir+sb+'/'+action):
+                os.makedirs(f_dir+sb+'/'+action)
+        vec=est[b]
+        vec_str = '\n'.join(['%f' % num for num in vec])
+        p_file=f_dir+sb+'/'+action+'/'+os.path.basename(F_list[b])
+        if os.path.exists(p_file):
+            print p_file
+        with open(p_file, "a") as p:
+            p.write(vec_str)
+
+
 def write_pred(est,bindex,G_list,params):
     batch_size=est.shape[0]
     seq_length=est.shape[1]
